@@ -7,13 +7,17 @@
 #include <boost/asio.hpp>
 
 #include "session.h"
+#include "reply.h"
 
 using boost::asio::ip::tcp;
+using http::server::reply;
 
 class session
 {
 public:
     session(boost::asio::io_service& io_service);
+
+    reply create_reply(std::string complete_request, int bytes_transferred);
 
     tcp::socket& socket();
 

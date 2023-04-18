@@ -47,7 +47,7 @@ add_library(config_parser_lib src/config_parser.cc)
 add_executable(webserver src/server_main.cc)
 # target_link_libraries
 # add_executable(webserver src/server_main.cc src/server.cc src/session.cc src/reply.cc)
-target_link_libraries(webserver server_lib session_lib reply_lib config_parser_lib Boost::system Boost::regex)
+target_link_libraries(webserver server_lib session_lib reply_lib config_parser_lib Boost::system Boost::regex pthread)
 
 
 # TODO(!): Update test executable name, srcs, and deps

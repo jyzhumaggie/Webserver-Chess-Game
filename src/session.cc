@@ -19,12 +19,21 @@ tcp::socket& session::socket()
 	return socket_;
 }
 
+reply session::create_reply(string complete_request, int bytes_transferred)
+{
+    reply reply_;
+    reply_.status = reply::ok; //http 200 response code
+    reply_.content = complete_request;
+    reply_.headers.resize(2);
+    reply_.headers[0].name = "Content-Length";
+    reply_.headers[0].value = std::to_string(bytes_transferred);
+    reply_.headers[1].name = "Content-Type";
+    reply_.headers[1].value = "text/plain"; //content type is text/plain
+    return reply_;
+}
+
 void session::start()
 {
-	// socket_.async_read_some(boost::asio::buffer(data_, max_length),
-	// 		boost::bind(&session::handle_read, this,
-	// 			boost::asio::placeholders::error,
-	// 			boost::asio::placeholders::bytes_transferred));
   	boost::regex e("\r\n\r\n|\n\n");
 	boost::asio::async_read_until(socket_, 
 		request_, 
@@ -48,14 +57,9 @@ void session::handle_read(const boost::system::error_code& error,
 			complete_request += new_char;
 		}
 
-		// cout << "data is : " << bytes_transferred << endl;
-		// reply r = create_reply(complete_request, bytes_transferred);
-		// boost::asio::async_write(socket_,
-		// 		r.to_buffer(),
-		// 		boost::bind(&session::handle_write, this,
-		// 			boost::asio::placeholders::error));
+		reply r = create_reply(complete_request, bytes_transferred);
 		boost::asio::async_write(socket_,
-				boost::asio::buffer(complete_request, bytes_transferred),
+				r.to_buffers(),
 				boost::bind(&session::handle_write, this,
 					boost::asio::placeholders::error));
 	}
@@ -69,10 +73,6 @@ void session::handle_write(const boost::system::error_code& error)
 {
 	if (!error)
 	{
-		// socket_.async_read_some(boost::asio::buffer(data_, max_length),
-		// 		boost::bind(&session::handle_read, this,
-		// 			boost::asio::placeholders::error,
-		// 			boost::asio::placeholders::bytes_transferred));
 		boost::regex e("\r\n\r\n|\n\n");
 
 		boost::asio::async_read_until(socket_,
