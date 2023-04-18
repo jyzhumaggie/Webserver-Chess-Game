@@ -14,27 +14,38 @@
 #include <boost/asio.hpp>
 #include <../src/server.cc>
 
+#include "config_parser.h"
+
+
 int main(int argc, char* argv[])
 {
-  try
-  {
-    if (argc != 2)
-    {
-      std::cerr << "Usage: async_tcp_echo_server <port>\n";
-      return 1;
-    }
+  	try
+  	{
+		if (argc != 2)
+		{
+			std::cerr << "Usage: async_tcp_echo_server <port>\n";
+			return 1;
+		}
 
-    boost::asio::io_service io_service;
+		NginxConfigParser config_parser;
+		NginxConfig config;
+		if (!config_parser.Parse(argv[1], &config)) {
+			return -1;
+		}
+		int port = config.get_port_from_config(&config);
+		if (port == -1) {
+			std::cerr << "Invalid port number in config file\n";
+			return -1;
+		}
 
-    using namespace std; // For atoi.
-    server s(io_service, atoi(argv[1]));
+		boost::asio::io_service io_service;
+		server s(io_service, port);
+		io_service.run();
+	}
+	catch (std::exception& e)
+	{
+		std::cerr << "Exception: " << e.what() << "\n";
+	}
 
-    io_service.run();
-  }
-  catch (std::exception& e)
-  {
-    std::cerr << "Exception: " << e.what() << "\n";
-  }
-
-  return 0;
+	return 0;
 }

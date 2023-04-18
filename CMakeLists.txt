@@ -29,7 +29,7 @@ add_subdirectory(/usr/src/googletest googletest)
 # Enable Boost
 # Use static libraries so binaries can be deployed without a full boost install
 set(Boost_USE_STATIC_LIBS ON)
-find_package(Boost 1.50 REQUIRED COMPONENTS system)
+find_package(Boost 1.50 REQUIRED COMPONENTS system regex)
 message(STATUS "Boost version: ${Boost_VERSION}")
 
 include_directories(include)
@@ -38,13 +38,17 @@ include_directories(include)
 find_program (BASH_PROGRAM bash)
 
 # TODO(!): Update name and srcs
-# add_library(example_lib src/example_lib.cc)
+add_library(server_lib src/server.cc)
+add_library(session_lib src/session.cc)
+add_library(reply_lib src/reply.cc)
+add_library(config_parser_lib src/config_parser.cc)
 
 # TODO(!): Update executable name, srcs, and deps
-# add_executable(example_server src/example_server_main.cc)
-# target_link_libraries(example_server example_lib Boost::system)
-add_executable(server src/server_main.cc src/server.cc src/session.cc)
-target_link_libraries(server Boost::system)
+add_executable(webserver src/server_main.cc)
+# target_link_libraries
+# add_executable(webserver src/server_main.cc src/server.cc src/session.cc src/reply.cc)
+target_link_libraries(webserver server_lib session_lib reply_lib config_parser_lib Boost::system Boost::regex)
+
 
 # TODO(!): Update test executable name, srcs, and deps
 # add_executable(example_lib_test tests/example_lib_test.cc)

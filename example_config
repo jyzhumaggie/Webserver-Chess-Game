@@ -1,0 +1,6 @@
+#this is an example configuration file for testing purposes
+
+foo bar;
+server {
+    port 8080;
+}
