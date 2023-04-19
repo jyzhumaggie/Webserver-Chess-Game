@@ -1,0 +1,23 @@
+foo "bar";
+
+server {
+    server {
+        server {
+
+        }
+        server {
+
+        }
+    }
+}
+
+server {
+    server {
+        server {
+
+        }
+        server {
+            
+        }
+    }
+}
