@@ -9,6 +9,10 @@
 
 namespace http {
     namespace server {
+        namespace misc_strings {
+            const char name_value_separator[] = { ':', ' ' };
+            const char crlf[] = { '\r', '\n' };
+        } 
         struct reply {
             enum status_type
             {
@@ -35,6 +39,12 @@ namespace http {
             std::vector<boost::asio::const_buffer> to_buffers(); //function to convert reply into vector of buffers
             static reply stock_reply(status_type status);
         };
+        namespace stock_replies {
+            std::string to_string(reply::status_type status);
+        }
+        namespace status_strings {
+            boost::asio::const_buffer to_buffer(reply::status_type status);
+        }
     }
 }
 

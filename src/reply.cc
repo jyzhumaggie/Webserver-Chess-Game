@@ -86,13 +86,6 @@ boost::asio::const_buffer to_buffer(reply::status_type status)
 
 } 
 
-namespace misc_strings {
-
-const char name_value_separator[] = { ':', ' ' };
-const char crlf[] = { '\r', '\n' };
-
-} 
-
 std::vector<boost::asio::const_buffer> reply::to_buffers()
 {
   std::vector<boost::asio::const_buffer> buffers;
