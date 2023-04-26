@@ -17,21 +17,20 @@ class session
 public:
     session(boost::asio::io_service& io_service);
 
-    reply create_reply(std::string complete_request, int bytes_transferred);
-
     tcp::socket& socket();
 
-    void start();
+    bool start();
+
+    std::string handle_read(const boost::system::error_code& error, size_t bytes_transferred);
+
+    bool handle_write(const boost::system::error_code& error);
+
+    boost::asio::streambuf request_;
 
 private:
-    void handle_read(const boost::system::error_code& error, size_t bytes_transferred);
-
-    void handle_write(const boost::system::error_code& error);
-
     tcp::socket socket_;
+
     enum { max_length = 1024 };
-    char data_[max_length];
-    boost::asio::streambuf request_;
 };
 
 #endif

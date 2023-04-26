@@ -38,6 +38,7 @@ namespace http {
             std::string content; //stuff to send in reply
             std::vector<boost::asio::const_buffer> to_buffers(); //function to convert reply into vector of buffers
             static reply stock_reply(status_type status);
+            reply create_reply(std::string complete_request,int bytes_transferred);
         };
         namespace stock_replies {
             std::string to_string(reply::status_type status);
