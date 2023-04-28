@@ -1,10 +1,12 @@
 #include "request_handler.h"
+#include <iostream>
 
 request_handler::request_handler(std::string base_dir) {
     path = base_dir;
 }
 
 bool request_handler::parse(std::string request) {
+    complete_request = request;
     std::vector<std::string> lines = get_lines(request);
     if (lines.size() == 0) {
         return false;
@@ -14,8 +16,19 @@ bool request_handler::parse(std::string request) {
         return false;
     }
     method = request_line_tokens[0];
-    path = request_line_tokens[1];
+    if (method != "GET") { //this needs to be expanded if we implement more methods
+        return false;
+    }
+    path += request_line_tokens[1];
     http_type = request_line_tokens[2];
+    if (http_type != "HTML/1.1") {
+        return false;
+    }
+    filename = get_filename(path);
+    if (filename == "") {
+        return false;
+    }
+    extension = get_extension(filename);
 
     for (int i = 1; i < lines.size(); i++) {
         if (valid_header(lines[i])) {
@@ -97,4 +110,31 @@ header request_handler::get_header(std::string header) {
     header_t.name = header_name;
     header_t.value = header_value;
     return header_t;
+}
+
+std::string request_handler::get_filename(std::string path) {
+    int last_slash = 0;
+    for (int i = 0; i < path.size(); i++) {
+        if (path[i] == '/') {
+            last_slash = i;
+        }
+    }
+    if (last_slash + 1 == path.size()) {
+        return "";
+    }
+    return path.substr(last_slash + 1, path.size() - last_slash - 1);
+}
+
+std::string request_handler::get_extension(std::string filename) {
+    int first_period = filename.size();
+    for (int i = 0; i < filename.size(); i++) {
+        if (filename[i] == '.') {
+            first_period = i;
+            break;
+        }
+    }
+    if (first_period == filename.size()) {
+        return "";
+    }
+    return filename.substr(first_period + 1, filename.size() - first_period - 1);
 }

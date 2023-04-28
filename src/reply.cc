@@ -238,19 +238,5 @@ reply reply::stock_reply(reply::status_type status)
   return rep;
 }
 
-
-reply reply::create_reply(std::string complete_request, int bytes_transferred)
-{
-    reply reply_;
-    reply_.status = reply::ok; //http 200 response code
-    reply_.content = complete_request;
-    reply_.headers.resize(2);
-    reply_.headers[0].name = "Content-Length";
-    reply_.headers[0].value = std::to_string(bytes_transferred);
-    reply_.headers[1].name = "Content-Type";
-    reply_.headers[1].value = "text/plain"; //content type is text/plain
-    return reply_;
-}
-
 }
 }

@@ -39,16 +39,18 @@ find_program (BASH_PROGRAM bash)
 
 # TODO(!): Update name and srcs
 add_library(server_lib src/server.cc)
-add_library(session_lib src/session.cc)
+add_library(session_lib src/session.cc src/echo_handler.cc src/file_handler.cc)
 add_library(request_handler_lib src/request_handler.cc)
-add_library(reply_lib src/request_handler src/reply.cc)
+add_library(echo_handler_lib src/echo_handler.cc src/request_handler.cc)
+add_library(file_handler_lib src/file_handler.cc src/request_handler.cc)
+add_library(reply_lib src/request_handler.cc src/echo_handler.cc src/reply.cc)
 add_library(config_parser_lib src/config_parser.cc)
 
 # TODO(!): Update executable name, srcs, and deps
 add_executable(webserver src/server_main.cc)
 # target_link_libraries
 # add_executable(webserver src/server_main.cc src/server.cc src/session.cc src/reply.cc)
-target_link_libraries(webserver server_lib session_lib request_handler_lib reply_lib config_parser_lib Boost::system Boost::regex pthread)
+target_link_libraries(webserver server_lib session_lib request_handler_lib echo_handler_lib file_handler_lib reply_lib config_parser_lib Boost::system Boost::regex pthread)
 
 
 # TODO(!): Update test executable name, srcs, and deps

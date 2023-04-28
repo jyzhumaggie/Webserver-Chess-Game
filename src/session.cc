@@ -6,6 +6,8 @@
 #include <boost/regex.hpp>
 #include <sstream>
 #include "reply.h"
+#include "echo_handler.h"
+#include "file_handler.h"
 
 using boost::asio::ip::tcp;
 using namespace std;
@@ -47,8 +49,17 @@ string session::handle_read(const boost::system::error_code& error,
 			complete_request += new_char;
 		}
 
-		reply r;
-        reply new_reply = r.create_reply(complete_request, bytes_transferred);
+		file_handler handler("../files/static/");
+		reply new_reply;
+		if (handler.parse(complete_request)) {
+			//serve file
+			new_reply = handler.handle_request();
+		}
+		else {
+			echo_handler echoer("");
+			echoer.parse(complete_request);
+			new_reply = echoer.handle_request();
+		}
 		boost::asio::async_write(socket_,
 				new_reply.to_buffers(),
 				boost::bind(&session::handle_write, this,
