@@ -15,6 +15,7 @@
 #include <stack>
 #include <string>
 #include <vector>
+#include <boost/log/trivial.hpp>
 
 #include "config_parser.h"
 
@@ -307,7 +308,7 @@ bool NginxConfigParser::Parse(const char* file_name, NginxConfig* config) {
   std::ifstream config_file;
   config_file.open(file_name);
   if (!config_file.good()) {
-    printf ("Failed to open config file: %s\n", file_name);
+    BOOST_LOG_TRIVIAL(error) << "ConfigParser: Failed to open config file: " << file_name << "\n";
     return false;
   }
 
