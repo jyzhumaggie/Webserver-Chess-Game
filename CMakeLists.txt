@@ -29,7 +29,7 @@ add_subdirectory(/usr/src/googletest googletest)
 # Enable Boost
 # Use static libraries so binaries can be deployed without a full boost install
 set(Boost_USE_STATIC_LIBS ON)
-find_package(Boost 1.50 REQUIRED COMPONENTS system regex)
+find_package(Boost 1.50 REQUIRED COMPONENTS system regex log_setup log)
 message(STATUS "Boost version: ${Boost_VERSION}")
 
 include_directories(include)
@@ -46,24 +46,22 @@ add_library(file_handler_lib src/file_handler.cc src/request_handler.cc)
 add_library(reply_lib src/request_handler.cc src/echo_handler.cc src/reply.cc)
 add_library(config_parser_lib src/config_parser.cc)
 
-# TODO(!): Update executable name, srcs, and deps
+# Update executable name, srcs, and deps
 add_executable(webserver src/server_main.cc)
 # target_link_libraries
 # add_executable(webserver src/server_main.cc src/server.cc src/session.cc src/reply.cc)
-target_link_libraries(webserver server_lib session_lib request_handler_lib echo_handler_lib file_handler_lib reply_lib config_parser_lib Boost::system Boost::regex pthread)
+target_link_libraries(webserver server_lib session_lib request_handler_lib echo_handler_lib file_handler_lib reply_lib config_parser_lib Boost::log_setup Boost::log Boost::system Boost::regex pthread)
 
 
-# TODO(!): Update test executable name, srcs, and deps
-# add_executable(example_lib_test tests/example_lib_test.cc)
-# target_link_libraries(example_lib_test example_lib gtest_main)
+# Update test executable name, srcs, and deps
 add_executable(config_parser_test tests/config_parser_test.cc)
 add_executable(reply_test tests/reply_test.cc)
 add_executable(session_test tests/session_test.cc)
-target_link_libraries(config_parser_test config_parser_lib gtest_main gmock_main)
+target_link_libraries(config_parser_test config_parser_lib Boost::log_setup Boost::log gtest_main gmock_main)
 target_link_libraries(reply_test reply_lib gtest_main gmock_main)
-target_link_libraries(session_test session_lib reply_lib Boost::system Boost::regex gtest_main gmock_main)
+target_link_libraries(session_test session_lib reply_lib Boost::system Boost::regex Boost::log_setup Boost::log gtest_main gmock_main)
 
-# TODO(!): Update with test binary
+# Update with test binary
 # gtest_discover_tests(example_lib_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 gtest_discover_tests(config_parser_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 gtest_discover_tests(reply_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
