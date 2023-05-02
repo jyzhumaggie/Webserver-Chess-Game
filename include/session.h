@@ -30,6 +30,8 @@ public:
 private:
     tcp::socket socket_;
 
+    std::string clientIP_;
+
     enum { max_length = 1024 };
 };
 
