@@ -9,11 +9,12 @@
 #include <iostream>
 
 using namespace http::server;
+using boost::asio::ip::tcp;
 
 class echo_handler : public request_handler {
     public:
         echo_handler(std::string base_dir);
-        virtual reply handle_request();
+        virtual void handle_request(tcp::socket& socket);
 };
 
 #endif
