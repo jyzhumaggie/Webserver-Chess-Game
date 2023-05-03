@@ -75,7 +75,8 @@ string session::handle_read(const boost::system::error_code& error,
 			BOOST_LOG_TRIVIAL(info)<< "Client " << clientIP_ << " issues valid request: " << complete_request;
 		}
 		else {
-			echo_handler echoer("",paths_);
+			// echo_handler echoer("",paths_);
+			echo_handler echoer("");
 			echoer.parse(complete_request);
 			echoer.handle_request(socket_);
 			BOOST_LOG_TRIVIAL(info) << "Client " << clientIP_ << " issues invalid request: " << complete_request;

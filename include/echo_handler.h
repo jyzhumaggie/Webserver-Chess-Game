@@ -15,7 +15,7 @@ using boost::asio::ip::tcp;
 
 class echo_handler : public request_handler {
     public:
-        echo_handler(std::string base_dir,std::vector<path> paths);
+        echo_handler(std::string base_dir);
         void handle_request(tcp::socket& socket);
 };
 

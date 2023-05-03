@@ -12,6 +12,56 @@ class FileHandlerTestFixture : public ::testing::Test {
  protected:
 };
 
+TEST_F(FileHandlerTestFixture, EmptyRequest) {
+  std::vector<path> paths;
+  file_handler handler("../files/static/", paths);
+	EXPECT_FALSE(handler.parse(""));
+}
+
+
+TEST_F(FileHandlerTestFixture, BadRequestIncorrectSize) {
+	std::vector<path> paths;
+  file_handler handler("../files/static/", paths);
+  	EXPECT_FALSE(handler.parse("GET\n\n")); 
+}
+
+TEST_F(FileHandlerTestFixture, BadRequestIncorrectMethod) {
+	std::vector<path> paths;
+  file_handler handler("../files/static/", paths);
+  	EXPECT_FALSE(handler.parse("POST hello.txt HTTP/1.1\n\n")); 
+}
+
+TEST_F(FileHandlerTestFixture, BadRequestIncorrectHTTP) {
+  std::vector<path> paths;
+  file_handler handler("../files/static/", paths);
+  	EXPECT_FALSE(handler.parse("GET hello.txt HTTP/1.0\n\n")); 
+}
+
+TEST_F(FileHandlerTestFixture, BadRequestNoFileName) {
+	std::vector<path> paths;
+  file_handler handler("../files/static/", paths);
+  	EXPECT_FALSE(handler.parse("GET static1/ HTTP/1.1\n\n")); 
+}
+
+
+TEST_F(FileHandlerTestFixture, GoodRequestSingleLine) {
+  std::vector<path> paths;
+	file_handler handler("",paths);
+  	EXPECT_TRUE(handler.parse("GET /static1/hello.txt HTTP/1.1\n\n")); 
+}
+
+TEST_F(FileHandlerTestFixture, GoodRequestMultiline) {
+  std::vector<path> paths;
+	file_handler handler("",paths);
+  	EXPECT_TRUE(handler.parse("GET /static1/hello.txt HTTP/1.1\nHost: localhost8080\n\n")); 
+}
+
+TEST_F(FileHandlerTestFixture, BadRequestMultiline) {
+  std::vector<path> paths;
+  file_handler handler("../files/static/", paths);
+  EXPECT_FALSE(handler.parse("GET /static1/hello.txt HTTP/1.1\nHost: localhost:8080\n\n")); 
+}
+
 TEST_F(FileHandlerTestFixture, BrokenPipeException) {
   bool except_found = false;
   try {

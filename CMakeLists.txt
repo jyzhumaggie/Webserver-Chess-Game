@@ -47,8 +47,6 @@ add_library(config_parser_lib src/config_parser.cc)
 
 # Executable name, srcs, and deps
 add_executable(webserver src/server_main.cc)
-# target_link_libraries
-# add_executable(webserver src/server_main.cc src/server.cc src/session.cc src/reply.cc)
 target_link_libraries(webserver server_lib session_lib request_handler_lib echo_handler_lib file_handler_lib reply_lib config_parser_lib Boost::log_setup Boost::log Boost::system Boost::regex pthread)
 
 
