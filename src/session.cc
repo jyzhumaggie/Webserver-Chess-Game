@@ -84,7 +84,6 @@ string session::handle_read(const boost::system::error_code& error,
 	else
 	{
         BOOST_LOG_TRIVIAL(info)<<"Client "<<clientIP_<<" handle read incomplete";
-        return complete_request;
 	}
 	return complete_request;
 }

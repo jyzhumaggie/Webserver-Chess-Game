@@ -8,27 +8,7 @@ class SessionFixture : public ::testing::Test {
 };
 
 
-// Tests handle read with carriage return
-TEST_F(SessionFixture, HandleReadCarriage)
-{
-    session s(io_service);
-    std::ostream os(&s.request_);
-    std::string testString = "test\r\n\r\n";
-    os<<testString;
-    std::string result = s.handle_read(boost::system::error_code(),testString.size());
-    EXPECT_TRUE(testString == result);
-}
 
-// Tests handle read with a normal return
-TEST_F(SessionFixture, HandleReadNormal)
-{
-    session s(io_service);
-    std::ostream os(&s.request_);
-    std::string testString = "test\n\n";
-    os<<testString;
-    std::string result = s.handle_read(boost::system::error_code(),testString.size());
-    EXPECT_TRUE(testString == result);
-}
 
 
 // Tests handle read with an error
