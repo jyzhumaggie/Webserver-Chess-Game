@@ -24,8 +24,9 @@ tcp::socket& session::socket()
 	return socket_;
 }
 
-bool session::start()
+bool session::start(std::vector<path> paths)
 {
+    paths_ = paths;
     boost::system::error_code error;
     boost::asio::ip::tcp::endpoint remote_ep = socket_.remote_endpoint(error);
     if(error)
@@ -47,7 +48,7 @@ bool session::start()
 			boost::asio::placeholders::bytes_transferred));
 
 
-    BOOST_LOG_TRIVIAL(info)<<"Client "<<clientIP_<<" session started";
+    BOOST_LOG_TRIVIAL(info) << "Client " << clientIP_ << " session started";
 
     return true;
 }
@@ -66,18 +67,18 @@ string session::handle_read(const boost::system::error_code& error,
 			complete_request += new_char;
 		}
 
-		file_handler handler("../files/static/");
+		file_handler handler("./",paths_);
 		reply new_reply;
 		if (handler.parse(complete_request)) {
 			//serve file
 			handler.handle_request(socket_);
-			BOOST_LOG_TRIVIAL(info)<<"Client "<<clientIP_<<" issues valid request";
+			BOOST_LOG_TRIVIAL(info)<< "Client " << clientIP_ << " issues valid request: " << complete_request;
 		}
 		else {
-			echo_handler echoer("");
+			echo_handler echoer("",paths_);
 			echoer.parse(complete_request);
 			echoer.handle_request(socket_);
-			BOOST_LOG_TRIVIAL(info)<<"Client "<<clientIP_<<" issues invalid request";
+			BOOST_LOG_TRIVIAL(info) << "Client " << clientIP_ << " issues invalid request: " << complete_request;
 		}
 		handle_write(error);
 	}

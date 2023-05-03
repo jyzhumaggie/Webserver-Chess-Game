@@ -1,8 +1,10 @@
 #include "request_handler.h"
 #include <iostream>
+#include <boost/log/trivial.hpp>
 
-request_handler::request_handler(std::string base_dir) {
-    path = base_dir;
+request_handler::request_handler(std::string base_dir,std::vector<path> paths) {
+    root_path = base_dir;
+    paths_ = paths;
 }
 
 bool request_handler::parse(std::string request) {
@@ -19,12 +21,29 @@ bool request_handler::parse(std::string request) {
     if (method != "GET") { //this needs to be expanded if we implement more methods
         return false;
     }
-    path += request_line_tokens[1];
+
+    std::string requestPath = request_line_tokens[1];
+
+    //Match endpoints and replace with roots from configuration file
+    for (size_t i = 0; i < paths_.size(); i++) {
+        std::string search = paths_[i].endpoint;
+        std::string replace = paths_[i].root;
+
+        size_t pos = requestPath.find(search);
+
+        if (pos != std::string::npos) {
+            requestPath.replace(pos, search.length(), replace);
+            break;
+        }
+    }
+
+    root_path+=requestPath;
+    
     http_type = request_line_tokens[2];
     if (http_type != "HTTP/1.1") {
         return false;
     }
-    filename = get_filename(path);
+    filename = get_filename(root_path);
     if (filename == "") {
         return false;
     }
@@ -112,17 +131,17 @@ header request_handler::get_header(std::string header) {
     return header_t;
 }
 
-std::string request_handler::get_filename(std::string path) {
+std::string request_handler::get_filename(std::string root_path) {
     int last_slash = 0;
-    for (int i = 0; i < path.size(); i++) {
-        if (path[i] == '/') {
+    for (int i = 0; i < root_path.size(); i++) {
+        if (root_path[i] == '/') {
             last_slash = i;
         }
     }
-    if (last_slash + 1 == path.size()) {
+    if (last_slash + 1 == root_path.size()) {
         return "";
     }
-    return path.substr(last_slash + 1, path.size() - last_slash - 1);
+    return root_path.substr(last_slash + 1, root_path.size() - last_slash - 1);
 }
 
 std::string request_handler::get_extension(std::string filename) {

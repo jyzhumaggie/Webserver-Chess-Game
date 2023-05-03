@@ -7,7 +7,7 @@
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
 
-file_handler::file_handler(std::string base_dir) : request_handler(base_dir) {
+file_handler::file_handler(std::string base_dir,std::vector<path> paths) : request_handler(base_dir,paths) {
     ext_to_mime["bin"] = "application/octet-stream";
     ext_to_mime["css"] = "text/css";
     ext_to_mime["csv"] = "text/csv";
@@ -40,7 +40,7 @@ void file_handler::handle_request(tcp::socket& socket) {
     reply reply_;
 
     FILE* fp;
-    if ((fp = fopen((path.c_str()), "rb"))) {
+    if ((fp = fopen((root_path.c_str()), "rb"))) {
         int buf_len = 100000;
         char sendbuf[buf_len];  //payload buffer
 

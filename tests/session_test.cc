@@ -37,7 +37,8 @@ TEST_F(SessionFixture, HandleWrite){
 //Tests session starts successfully
 TEST_F(SessionFixture, SessionStart){
   session s(io_service);
-  EXPECT_TRUE(s.start());
+  std::vector<path> paths;
+  EXPECT_TRUE(s.start(paths));
 }
 
 

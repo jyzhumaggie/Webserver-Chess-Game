@@ -95,8 +95,11 @@ int main(int argc, char* argv[])
 
 		boost::asio::io_service io_service;
 		BOOST_LOG_TRIVIAL(info) << "Starting server on port: " << port << "\n";
-		server s(io_service, port);
+        std::vector<path> paths = config.get_path_from_config();
+        
+		server s(io_service, port, paths);
 		BOOST_LOG_TRIVIAL(info) << "Accepting connections\n";
+
 		io_service.run();
 	}
 	catch (std::exception& e)

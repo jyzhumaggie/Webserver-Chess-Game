@@ -8,6 +8,7 @@
 
 #include "session.h"
 #include "reply.h"
+#include "config_parser.h"
 
 using boost::asio::ip::tcp;
 using http::server::reply;
@@ -19,7 +20,7 @@ public:
 
     tcp::socket& socket();
 
-    bool start();
+    bool start(std::vector<path> paths);
 
     std::string handle_read(const boost::system::error_code& error, size_t bytes_transferred);
 
@@ -31,6 +32,8 @@ private:
     tcp::socket socket_;
 
     std::string clientIP_;
+
+    std::vector<path> paths_;
 
     enum { max_length = 1024 };
 };

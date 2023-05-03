@@ -1,7 +1,7 @@
 #include "echo_handler.h"
 #include "request_handler.h"
 
-echo_handler::echo_handler(std::string base_dir) : request_handler(base_dir) {
+echo_handler::echo_handler(std::string base_dir,std::vector<path> paths) : request_handler(base_dir,paths_) {
 }
 
 void echo_handler::handle_request(tcp::socket& socket) {

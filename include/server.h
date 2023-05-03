@@ -3,6 +3,7 @@
 
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
+#include "config_parser.h"
 // #include <../src/session.cc>
 
 using boost::asio::ip::tcp;
@@ -10,8 +11,8 @@ using boost::asio::ip::tcp;
 class server
 {
     public:
-  	    server(boost::asio::io_service& io_service, short port);
-
+  	    server(boost::asio::io_service& io_service, short port,std::vector<path> paths);
+        
     private:
         void start_accept();
 
@@ -20,6 +21,7 @@ class server
 
         boost::asio::io_service& io_service_;
         tcp::acceptor acceptor_;
+        std::vector<path> paths_;
 };
 
 

@@ -3,4 +3,13 @@
 foo bar;
 server {
     port 8080;
+    location /echo/ { 
+    }
+    location /static1/ {
+        root ../files/static1/;
+    }
+    location /static2/ {
+        root ../files/static2/;
+    }
+    
 }

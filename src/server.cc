@@ -5,13 +5,13 @@
 #include "session.h"
 #include "server.h"
 
-
 using boost::asio::ip::tcp;
 
-server::server(boost::asio::io_service& io_service, short port)
+server::server(boost::asio::io_service& io_service, short port,std::vector<path> paths)
 	: io_service_(io_service),
 	acceptor_(io_service, tcp::endpoint(tcp::v4(), port))
-{
+{  
+        paths_ = paths;
 		start_accept();
 }
 
@@ -27,7 +27,7 @@ void server::handle_accept(session* new_session, const boost::system::error_code
 {
 	if (!error)
 	{
-		new_session->start();
+		new_session->start(paths_);
 	}
 	else
 	{
@@ -36,4 +36,3 @@ void server::handle_accept(session* new_session, const boost::system::error_code
 
 	start_accept();
 }
-

@@ -8,14 +8,16 @@
 #include <boost/asio.hpp>
 #include <iostream>
 #include <unordered_map>
+#include "config_parser.h"
 
 using namespace http::server;
 using boost::asio::ip::tcp;
 
 class file_handler : public request_handler {
     public:
-        file_handler(std::string base_dir);
+        file_handler(std::string base_dir,std::vector<path> paths);
         void handle_request(tcp::socket& socket);
+        
     private:
         std::unordered_map<std::string, std::string> ext_to_mime;
 };

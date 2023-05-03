@@ -19,6 +19,7 @@ FROM ubuntu:jammy as deploy
 # TODO(!): Copy server output binary to "."
 COPY --from=builder /usr/src/project/build/bin/webserver .
 COPY --from=builder /usr/src/project/config/example.conf .
+COPY --from=builder /usr/src/project/files .
 
 # TODO(!): Expose some port(s)
 EXPOSE 80

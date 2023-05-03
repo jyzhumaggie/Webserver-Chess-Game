@@ -9,6 +9,12 @@
 
 class NginxConfig;
 
+struct path 
+{
+  std::string endpoint = "";
+  std::string root = "";
+};
+
 // The parsed representation of a single config statement.
 class NginxConfigStatement {
  public:
@@ -23,6 +29,11 @@ class NginxConfig {
   std::string ToString(int depth = 0);
   std::vector<std::shared_ptr<NginxConfigStatement>> statements_;
   int get_port_from_config(const NginxConfig* config);
+  // std::vector<std::string>  get_path_from_config(const NginxConfig* config);
+  std::vector<path>  get_path_from_config();
+  
+  private:
+    std::vector<path> paths_;
 };
 
 // The driver that parses a config file and generates an NginxConfig.
