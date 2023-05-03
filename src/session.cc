@@ -53,22 +53,16 @@ string session::handle_read(const boost::system::error_code& error,
 		reply new_reply;
 		if (handler.parse(complete_request)) {
 			//serve file
-			new_reply = handler.handle_request();
+			handler.handle_request(socket_);
 		}
 		else {
 			echo_handler echoer("");
 			echoer.parse(complete_request);
-			new_reply = echoer.handle_request();
+			echoer.handle_request(socket_);
 		}
-		boost::asio::async_write(socket_,
-				new_reply.to_buffers(),
-				boost::bind(&session::handle_write, this,
-					boost::asio::placeholders::error));
+		handle_write(error);
 	}
-	else
-	{
-        return complete_request;
-	}
+	return complete_request;
 }
 
 bool session::handle_write(const boost::system::error_code& error)
