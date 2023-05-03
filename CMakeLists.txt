@@ -45,7 +45,7 @@ add_library(file_handler_lib src/file_handler.cc src/request_handler.cc)
 add_library(reply_lib src/request_handler.cc src/echo_handler.cc src/reply.cc)
 add_library(config_parser_lib src/config_parser.cc)
 
-# Update executable name, srcs, and deps
+# Executable name, srcs, and deps
 add_executable(webserver src/server_main.cc)
 # target_link_libraries
 # add_executable(webserver src/server_main.cc src/server.cc src/session.cc src/reply.cc)
@@ -57,10 +57,12 @@ add_executable(config_parser_test tests/config_parser_test.cc)
 add_executable(reply_test tests/reply_test.cc)
 add_executable(session_test tests/session_test.cc)
 add_executable(file_handler_test tests/file_handler_test.cc)
+add_executable(echo_handler_test tests/echo_handler_test.cc)
 target_link_libraries(config_parser_test config_parser_lib Boost::log_setup Boost::log gtest_main gmock_main)
 target_link_libraries(reply_test reply_lib gtest_main gmock_main)
 target_link_libraries(session_test session_lib reply_lib Boost::system Boost::regex Boost::log_setup Boost::log gtest_main gmock_main)
 target_link_libraries(file_handler_test file_handler_lib reply_lib request_handler_lib gtest_main gmock_main)
+target_link_libraries(echo_handler_test echo_handler_lib reply_lib Boost::system Boost::regex Boost::log_setup Boost::log gtest_main gmock_main)
 
 # Update with test binary
 # gtest_discover_tests(example_lib_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
@@ -68,6 +70,7 @@ gtest_discover_tests(config_parser_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE
 gtest_discover_tests(reply_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 gtest_discover_tests(session_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 gtest_discover_tests(file_handler_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+gtest_discover_tests(echo_handler_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 
 #Add integration Test
 #if(NOT "${CMAKE_BUILD_TYPE}" STREQUAL "Coverage")
@@ -77,4 +80,4 @@ gtest_discover_tests(file_handler_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_
 
 #Generating coverage report
 include(cmake/CodeCoverageReportConfig.cmake)
-generate_coverage_report(TARGETS config_parser_lib reply_lib session_lib file_handler_lib request_handler_lib TESTS file_handler_test config_parser_test reply_test session_test)
+generate_coverage_report(TARGETS config_parser_lib reply_lib session_lib file_handler_lib request_handler_lib echo_handler_lib TESTS file_handler_test config_parser_test reply_test session_test echo_handler_test)

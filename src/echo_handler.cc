@@ -1,6 +1,5 @@
 #include "echo_handler.h"
 #include "request_handler.h"
-#include "reply.h"
 
 echo_handler::echo_handler(std::string base_dir) : request_handler(base_dir) {
 }

@@ -5,6 +5,8 @@
 #include <vector>
 #include "request_handler.h"
 #include "header.h"
+#include "reply.h"
+
 #include <boost/asio.hpp>
 #include <iostream>
 
@@ -14,7 +16,7 @@ using boost::asio::ip::tcp;
 class echo_handler : public request_handler {
     public:
         echo_handler(std::string base_dir);
-        virtual void handle_request(tcp::socket& socket);
+        void handle_request(tcp::socket& socket);
 };
 
 #endif

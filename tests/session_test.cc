@@ -9,8 +9,6 @@ class SessionFixture : public ::testing::Test {
 
 
 
-
-
 // Tests handle read with an error
 TEST_F(SessionFixture, HandleReadError)
 {

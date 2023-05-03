@@ -15,7 +15,7 @@ using boost::asio::ip::tcp;
 class file_handler : public request_handler {
     public:
         file_handler(std::string base_dir);
-        virtual void handle_request(tcp::socket& socket);
+        void handle_request(tcp::socket& socket);
     private:
         std::unordered_map<std::string, std::string> ext_to_mime;
 };
