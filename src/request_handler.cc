@@ -21,7 +21,7 @@ bool request_handler::parse(std::string request) {
     }
     path += request_line_tokens[1];
     http_type = request_line_tokens[2];
-    if (http_type != "HTTP/1.1") {
+    if (http_type != "HTML/1.1") {
         return false;
     }
     filename = get_filename(path);

@@ -9,14 +9,13 @@
 #include <iostream>
 
 using namespace http::server;
-using boost::asio::ip::tcp;
 
 class request_handler {
     public:
         request_handler(std::string base_dir);
         bool parse(std::string request); //true if successfully parsed
         //need to make parse more robust - make sure method is valid (GET), path exists (and get content type)
-        virtual void handle_request(tcp::socket& socket) = 0; 
+        virtual reply handle_request() = 0; 
         
     protected:
         std::vector<std::string> get_lines(std::string input); //Vector of input with delimeter \n or \r\n
