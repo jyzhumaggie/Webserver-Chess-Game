@@ -64,15 +64,52 @@ else
     echo "Test 3 Fail"
 fi
 
+#Test 4: testing retrieval of static file
+
+echo -e "GET /static1/hello.txt HTTP/1.1\n\n" | timeout $TIMEOUT nc $SERVER_IP $SERVER_PORT > temp_file_test4
+
+diff temp_file_test4 integration_test4_result
+
+RESULT=$?
+
+TEST_4_RESULT=0
+if [ $RESULT -eq 0 ];
+then
+    TEST_4_RESULT=1
+    echo "Test 4 Success"
+else
+    echo "Test 4 Fail"
+fi
+
+#Test 5: testing invalid static file
+
+echo -e "GET /static1/helloy.txt HTTP/1.1\n\n" | timeout $TIMEOUT nc $SERVER_IP $SERVER_PORT > temp_file_test5
+
+diff temp_file_test5 integration_test5_result
+
+RESULT=$?
+
+TEST_5_RESULT=0
+if [ $RESULT -eq 0 ];
+then
+    TEST_5_RESULT=1
+    echo "Test 5 Success"
+else
+    echo "Test 5 Fail"
+fi
+
 #Clean up (remove temp files and kill server)
 kill $SERVER_PID
 rm temp_file_test1
 rm temp_file_test2
 rm temp_file_test3
+rm temp_file_test4
+rm temp_file_test5
 
 
 #Either exit 0 or exit 1 if tests pass or not
-if [ $TEST_1_RESULT -eq 1 ] && [ $TEST_2_RESULT -eq 1 ] && [ $TEST_2_RESULT -eq 1 ]; then
+if [ $TEST_1_RESULT -eq 1 ] && [ $TEST_2_RESULT -eq 1 ] && [ $TEST_2_RESULT -eq 1 ] && \
+   [ $TEST_4_RESULT -eq 1 ] && [ $TEST_5_RESULT -eq 1 ]; then
     echo "All tests passed!"
     exit 0
 else
