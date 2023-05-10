@@ -38,16 +38,17 @@ include_directories(include)
 find_program (BASH_PROGRAM bash)
 
 add_library(server_lib src/server.cc)
-add_library(session_lib src/session.cc src/echo_handler.cc src/file_handler.cc)
+add_library(session_lib src/session.cc src/echo_handler.cc src/file_handler.cc src/error_handler.cc)
 add_library(request_handler_lib src/request_handler.cc)
 add_library(echo_handler_lib src/echo_handler.cc src/request_handler.cc)
+add_library(error_handler src/error_handler.cc src/request_handler.cc)
 add_library(file_handler_lib src/file_handler.cc src/request_handler.cc)
 add_library(reply_lib src/request_handler.cc src/echo_handler.cc src/reply.cc)
 add_library(config_parser_lib src/config_parser.cc)
 
 # Executable name, srcs, and deps
 add_executable(webserver src/server_main.cc)
-target_link_libraries(webserver server_lib session_lib request_handler_lib echo_handler_lib file_handler_lib reply_lib config_parser_lib Boost::log_setup Boost::log Boost::system Boost::regex pthread)
+target_link_libraries(webserver server_lib session_lib request_handler_lib echo_handler_lib error_handler file_handler_lib reply_lib config_parser_lib Boost::log_setup Boost::log Boost::system Boost::regex pthread)
 
 
 # Test executable name, srcs, and deps

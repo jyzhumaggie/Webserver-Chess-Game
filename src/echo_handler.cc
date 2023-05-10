@@ -6,7 +6,7 @@ echo_handler::echo_handler(std::string base_dir) : request_handler(base_dir,path
 
 void echo_handler::handle_request(tcp::socket& socket) {
     reply reply_;
-    reply_.status = reply::bad_request;
+    reply_.status = reply::ok;
     reply_.content = complete_request;
     reply_.headers.resize(2);
     reply_.headers[0].name = "Content-Length";

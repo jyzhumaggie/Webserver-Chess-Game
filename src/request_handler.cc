@@ -7,19 +7,19 @@ request_handler::request_handler(std::string base_dir,std::vector<path> paths) {
     paths_ = paths;
 }
 
-bool request_handler::parse(std::string request) {
+handler_type request_handler::parse(std::string request) {
     complete_request = request;
     std::vector<std::string> lines = get_lines(request);
     if (lines.size() == 0) {
-        return false;
+        return errorHandler;
     }
     std::vector<std::string> request_line_tokens = get_tokens_from_request_line(lines[0]);
     if (request_line_tokens.size() != 3) {
-        return false;
+        return errorHandler;
     }
     method = request_line_tokens[0];
     if (method != "GET") { //this needs to be expanded if we implement more methods
-        return false;
+        return errorHandler;
     }
 
     std::string requestPath = request_line_tokens[1];
@@ -31,6 +31,11 @@ bool request_handler::parse(std::string request) {
 
         size_t pos = requestPath.find(search);
 
+        if (pos != std::string::npos && search == "/echo/")
+        {
+            return echoHandler;
+        }
+
         if (pos != std::string::npos) {
             requestPath.replace(pos, search.length(), replace);
             break;
@@ -41,11 +46,11 @@ bool request_handler::parse(std::string request) {
     
     http_type = request_line_tokens[2];
     if (http_type != "HTTP/1.1") {
-        return false;
+        return errorHandler;
     }
     filename = get_filename(root_path);
     if (filename == "") {
-        return false;
+        return errorHandler;
     }
     extension = get_extension(filename);
 
@@ -54,10 +59,10 @@ bool request_handler::parse(std::string request) {
             headers.push_back(get_header(lines[i]));
         }
         else {
-            return false;
+            return errorHandler;
         }
     }
-    return true;
+    return staticHandler;
 }
 
 std::vector<std::string> request_handler::get_lines(std::string input) {

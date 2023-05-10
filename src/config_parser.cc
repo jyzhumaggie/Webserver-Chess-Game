@@ -77,6 +77,16 @@ std::vector<path> NginxConfig::get_path_from_config() {
 					child_statement->tokens_.size() >= 2 && 
 					child_statement->child_block_.get() != nullptr)
 				{
+					if (child_statement->tokens_.size() == 2) {
+						auto s = child_statement->child_block_->statements_;
+						if (s.size() == 0) {
+							path current_path;
+							current_path.endpoint = child_statement->tokens_[1];
+							BOOST_LOG_TRIVIAL(info) << "Getting echo path: " << current_path.endpoint;
+							paths_.push_back(current_path);
+						}
+
+					}
 					for (auto location_statement : child_statement->child_block_->statements_)
 					{
 						if (location_statement->tokens_[0] == "root" && 
@@ -86,28 +96,15 @@ std::vector<path> NginxConfig::get_path_from_config() {
 							path current_path;
                             current_path.endpoint = child_statement->tokens_[1];
 							current_path.root = location_statement->tokens_[1];
+							BOOST_LOG_TRIVIAL(info) << "Getting static path: " << current_path.endpoint;
 							paths_.push_back(current_path);
 						}
+						
 					}        
 				}
-			}
-		} else if (statement->tokens_[0] == "echo" &&
-					statement->child_block_.get() != nullptr)
-		{
-			for (auto child_statement : statement->child_block_->statements_)
-			{
-				if (child_statement->tokens_[0] == "location" && 
-					child_statement->tokens_.size() >= 2)
-				{
-					BOOST_LOG_TRIVIAL(info) << "Im here!!!\n";
 
-					path current_path;
-                    current_path.endpoint = child_statement->tokens_[1];
-					current_path.root = " ";
-					paths_.push_back(current_path);
-				}
 			}
-		}
+		} 
 	}
 	return paths_;
 }

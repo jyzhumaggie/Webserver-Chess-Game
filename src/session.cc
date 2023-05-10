@@ -8,6 +8,7 @@
 #include "reply.h"
 #include "echo_handler.h"
 #include "file_handler.h"
+#include "error_handler.h"
 #include <boost/log/trivial.hpp>
 #include <string>
 
@@ -69,18 +70,27 @@ string session::handle_read(const boost::system::error_code& error,
 
 		file_handler handler("./",paths_);
 		reply new_reply;
-		if (handler.parse(complete_request)) {
+		handler_type handler_type = handler.parse(complete_request);
+		if (handler_type == staticHandler) {
 			//serve file
 			handler.handle_request(socket_);
-			BOOST_LOG_TRIVIAL(info)<< "Client " << clientIP_ << " issues valid request: " << complete_request;
+			BOOST_LOG_TRIVIAL(info)<< "Client " << clientIP_ << " issues valid request to static handler: " << complete_request;
 		}
-		else {
+		else if(handler_type == echoHandler) {
 			// echo_handler echoer("",paths_);
 			echo_handler echoer("");
 			echoer.parse(complete_request);
 			echoer.handle_request(socket_);
+			BOOST_LOG_TRIVIAL(info) << "Client " << clientIP_ << " issues valid request to echo handler: " << complete_request;
+		}
+		else
+		{
+			error_handler error_handler("");
+			error_handler.parse(complete_request);
+			error_handler.handle_request(socket_);
 			BOOST_LOG_TRIVIAL(info) << "Client " << clientIP_ << " issues invalid request: " << complete_request;
 		}
+
 		handle_write(error);
 	}
 	else

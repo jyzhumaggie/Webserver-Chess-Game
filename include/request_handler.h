@@ -12,10 +12,12 @@
 using namespace http::server;
 using boost::asio::ip::tcp;
 
+enum handler_type {staticHandler, echoHandler, errorHandler};
+
 class request_handler {
     public:
         request_handler(std::string base_dir,std::vector<path> paths);
-        bool parse(std::string request); //true if successfully parsed
+        handler_type parse(std::string request); //true if successfully parsed
         //need to make parse more robust - make sure method is valid (GET), path exists (and get content type)
         virtual void handle_request(tcp::socket& socket) = 0; 
         
