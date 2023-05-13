@@ -29,11 +29,12 @@ class NginxConfig {
   std::string ToString(int depth = 0);
   std::vector<std::shared_ptr<NginxConfigStatement>> statements_;
   int get_port_from_config(const NginxConfig* config);
-  // std::vector<std::string>  get_path_from_config(const NginxConfig* config);
   std::vector<path>  get_path_from_config();
-  
+  std::vector<std::string> get_handler_types();
+
   private:
     std::vector<path> paths_;
+    std::vector<std::string> handler_factory_types_;
 };
 
 // The driver that parses a config file and generates an NginxConfig.

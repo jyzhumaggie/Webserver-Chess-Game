@@ -96,7 +96,10 @@ int main(int argc, char* argv[])
 		boost::asio::io_service io_service;
 		BOOST_LOG_TRIVIAL(info) << "Starting server on port: " << port << "\n";
         std::vector<path> paths = config.get_path_from_config();
-        
+        std::vector<std::string> handlerNames = config.get_handler_types();
+		BOOST_LOG_TRIVIAL(info) << "handler1:" << handlerNames[0];
+		BOOST_LOG_TRIVIAL(info) << "handler1:" << handlerNames[1];
+		BOOST_LOG_TRIVIAL(info) << "handler number? " << handlerNames.size();
 		server s(io_service, port, paths);
 		BOOST_LOG_TRIVIAL(info) << "Accepting connections\n";
 

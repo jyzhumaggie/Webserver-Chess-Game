@@ -15,6 +15,7 @@
 #include <stack>
 #include <string>
 #include <vector>
+#include <algorithm>
 #include <boost/log/trivial.hpp>
 
 #include "config_parser.h"
@@ -63,9 +64,24 @@ int NginxConfig::get_port_from_config(const NginxConfig* config) {
 	return -1;
 }
 
-
+std::vector<std::string> NginxConfig::get_handler_types() {
+	for (auto s : statements_) {
+		if (s->tokens_[0] == "server" && s->child_block_.get() != nullptr) {
+			for (auto child : s->child_block_->statements_) {
+				if (child->tokens_[0] == "location" &&
+					child->tokens_.size() >= 3 &&
+					child->child_block_.get() != nullptr) {
+						std::vector<std::string>::iterator it = std::find(handler_factory_types_.begin(), handler_factory_types_.end(), child->tokens_[2]);
+						if (it == handler_factory_types_.end()) {
+							handler_factory_types_.push_back(child->tokens_[2]);
+						}
+				}
+			}
+		}
+	}
+	return handler_factory_types_;
+}
 std::vector<path> NginxConfig::get_path_from_config() {
-	// paths_.push_back("ImPath");
 	for (auto statement : statements_)
   	{
 		if (statement->tokens_[0] == "server" &&

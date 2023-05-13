@@ -3,12 +3,12 @@
 foo bar;
 server {
     port 8080;
-    location /echo/ { 
+    location /echo/ EchoHandler { 
     }
-    location /static1/ {
+    location /static1/ StaticHandler {
         root ../files/static1/;
     }
-    location /static2/ {
+    location /static2/ StaticHandler {
         root ../files/static2/;
     }
     
