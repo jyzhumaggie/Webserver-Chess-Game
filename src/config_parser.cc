@@ -64,17 +64,14 @@ int NginxConfig::get_port_from_config(const NginxConfig* config) {
 	return -1;
 }
 
-std::vector<std::string> NginxConfig::get_handler_types() {
+std::map<std::string, std::string> NginxConfig::get_handler_types() {
 	for (auto s : statements_) {
 		if (s->tokens_[0] == "server" && s->child_block_.get() != nullptr) {
 			for (auto child : s->child_block_->statements_) {
 				if (child->tokens_[0] == "location" &&
 					child->tokens_.size() >= 3 &&
 					child->child_block_.get() != nullptr) {
-						std::vector<std::string>::iterator it = std::find(handler_factory_types_.begin(), handler_factory_types_.end(), child->tokens_[2]);
-						if (it == handler_factory_types_.end()) {
-							handler_factory_types_.push_back(child->tokens_[2]);
-						}
+					handler_factory_types_[child->tokens_[1]] = child->tokens_[2];
 				}
 			}
 		}

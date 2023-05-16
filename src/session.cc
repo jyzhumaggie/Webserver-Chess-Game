@@ -15,14 +15,19 @@
 using boost::asio::ip::tcp;
 using namespace std;
 
-session::session(boost::asio::io_service& io_service)
+session::session(boost::asio::io_service& io_service, NginxConfig& config, std::map<std::string, request_handler_factory*> routes)
 		: socket_(io_service)
 {
+	config_ = config;
 }
 
 tcp::socket& session::socket()
 {
 	return socket_;
+}
+
+bool session::set_routes(std::map<std::string, request_handler_factory*> routes){
+	routes_ = routes;
 }
 
 bool session::start(std::vector<path> paths)
@@ -54,6 +59,9 @@ bool session::start(std::vector<path> paths)
     return true;
 }
 
+string session::match(map<std::string, request_handler_factory*> routes, string& url) {
+	
+}
 
 string session::handle_read(const boost::system::error_code& error,
 		size_t bytes_transferred)
@@ -67,6 +75,9 @@ string session::handle_read(const boost::system::error_code& error,
 			is.get(new_char);
 			complete_request += new_char;
 		}
+		BOOST_LOG_TRIVIAL(info) << "the size of routes_ in session is " << routes_.size();
+
+		auto factory = routes_["/echo/"];
 
 		file_handler handler("./",paths_);
 		reply new_reply;
@@ -77,7 +88,6 @@ string session::handle_read(const boost::system::error_code& error,
 			BOOST_LOG_TRIVIAL(info)<< "Client " << clientIP_ << " issues valid request to static handler: " << complete_request;
 		}
 		else if(handler_type == echoHandler) {
-			// echo_handler echoer("",paths_);
 			echo_handler echoer("");
 			echoer.parse(complete_request);
 			echoer.handle_request(socket_);

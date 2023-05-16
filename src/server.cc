@@ -4,20 +4,46 @@
 #include <boost/asio.hpp>
 #include "session.h"
 #include "server.h"
+#include <boost/log/trivial.hpp>
 
 using boost::asio::ip::tcp;
 
-server::server(boost::asio::io_service& io_service, short port,std::vector<path> paths)
+server::server(boost::asio::io_service& io_service, short port, std::vector<path> paths, NginxConfig& config, std::map<std::string, std::string> handler_names)
 	: io_service_(io_service),
 	acceptor_(io_service, tcp::endpoint(tcp::v4(), port))
 {  
-        paths_ = paths;
-		start_accept();
+	paths_ = paths;
+	handler_names_ = handler_names;
+	config_ = config;
+	echo_handler_factory_ = nullptr;
+	static_handler_factory_ = nullptr;	
+	start_accept();
 }
+
+void server::create_handler_factory(const std::string& name, NginxConfig& config, const std::string& endpoint) {
+	if (name == "EchoHandler") {
+		routes_[endpoint] = new echo_handler_factory(endpoint, config);
+	} else if (name == "StaticHandler") {
+		routes_[endpoint] = new static_handler_factory(endpoint, config);
+	} else {
+		return ;
+	}
+}
+
 
 void server::start_accept()
 {
-	session* new_session = new session(io_service_);
+	session* new_session = new session(io_service_, config_, routes_);
+	
+
+	std::map<std::string, std::string>::iterator it = handler_names_.begin();
+	BOOST_LOG_TRIVIAL(info) << "Start creating handler factories:\n";
+	while (it != handler_names_.end())
+	{
+		create_handler_factory(it->second, config_, it->first);
+		++it;
+	}
+	new_session->set_routes(routes_);
 	acceptor_.async_accept(new_session->socket(),
 		boost::bind(&server::handle_accept, this, new_session,
 		boost::asio::placeholders::error));

@@ -6,7 +6,7 @@
 #include <memory>
 #include <string>
 #include <vector>
-
+#include <map>
 class NginxConfig;
 
 struct path 
@@ -30,11 +30,11 @@ class NginxConfig {
   std::vector<std::shared_ptr<NginxConfigStatement>> statements_;
   int get_port_from_config(const NginxConfig* config);
   std::vector<path>  get_path_from_config();
-  std::vector<std::string> get_handler_types();
+  std::map<std::string, std::string> get_handler_types();
 
   private:
     std::vector<path> paths_;
-    std::vector<std::string> handler_factory_types_;
+    std::map<std::string, std::string> handler_factory_types_;
 };
 
 // The driver that parses a config file and generates an NginxConfig.

@@ -23,7 +23,8 @@
 #include <boost/log/sources/severity_logger.hpp>
 #include <boost/log/sources/record_ostream.hpp>
 #include <csignal>
-
+#include <map>
+#include "echo_handler_factory.h"
 #include "config_parser.h"
 
 namespace logging = boost::log;
@@ -34,29 +35,28 @@ namespace keywords = boost::log::keywords;
 void log_init()
 {
 	logging::add_console_log
-    (
+	(
 		std::cout,
-        keywords::format = "[%TimeStamp%][%ThreadID%][%Severity%]: %Message%"
-    );
+		keywords::format = "[%TimeStamp%][%ThreadID%][%Severity%]: %Message%"
+	);
 
-    logging::add_file_log
-    (
-        keywords::file_name = "sample_%N.log",
-        keywords::rotation_size = 10 * 1024 * 1024,
-        keywords::time_based_rotation = sinks::file::rotation_at_time_point(0, 0, 0),
-        keywords::format = "[%TimeStamp%][%ThreadID%][%Severity%]: %Message%"
-    );
+	logging::add_file_log
+	(
+		keywords::file_name = "sample_%N.log",
+		keywords::rotation_size = 10 * 1024 * 1024,
+		keywords::time_based_rotation = sinks::file::rotation_at_time_point(0, 0, 0),
+		keywords::format = "[%TimeStamp%][%ThreadID%][%Severity%]: %Message%"
+	);
 
 
-    logging::core::get()->set_filter
-    (
-        logging::trivial::severity >= logging::trivial::info
+	logging::core::get()->set_filter
+	(
+		logging::trivial::severity >= logging::trivial::info
 	);
 }
 
 void signal_handler(int signal)
 {
-    // gSignalStatus = signal;
 	BOOST_LOG_TRIVIAL(fatal) << "Received signal: " << signal << ", exiting\n";
 	exit(signal);
 }
@@ -65,7 +65,7 @@ void signal_handler(int signal)
 int main(int argc, char* argv[])
 {
 	log_init();
-    logging::add_common_attributes();
+	logging::add_common_attributes();
 	std::signal(SIGINT, signal_handler);
 	std::signal(SIGQUIT, signal_handler);
 	
@@ -95,12 +95,11 @@ int main(int argc, char* argv[])
 
 		boost::asio::io_service io_service;
 		BOOST_LOG_TRIVIAL(info) << "Starting server on port: " << port << "\n";
-        std::vector<path> paths = config.get_path_from_config();
-        std::vector<std::string> handlerNames = config.get_handler_types();
-		BOOST_LOG_TRIVIAL(info) << "handler1:" << handlerNames[0];
-		BOOST_LOG_TRIVIAL(info) << "handler1:" << handlerNames[1];
-		BOOST_LOG_TRIVIAL(info) << "handler number? " << handlerNames.size();
-		server s(io_service, port, paths);
+		std::vector<path> paths = config.get_path_from_config();
+
+		std::map<std::string, std::string> handler_names = config.get_handler_types();
+
+		server s(io_service, port, paths, config, handler_names);
 		BOOST_LOG_TRIVIAL(info) << "Accepting connections\n";
 
 		io_service.run();

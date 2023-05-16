@@ -46,9 +46,13 @@ add_library(file_handler_lib src/file_handler.cc src/request_handler.cc)
 add_library(reply_lib src/request_handler.cc src/echo_handler.cc src/reply.cc)
 add_library(config_parser_lib src/config_parser.cc)
 
+
+add_library(echo_handler_factory_lib src/echo_handler_factory.cc)
+add_library(static_handler_factory_lib src/static_handler_factory.cc)
+
 # Executable name, srcs, and deps
 add_executable(webserver src/server_main.cc)
-target_link_libraries(webserver server_lib session_lib request_handler_lib echo_handler_lib error_handler file_handler_lib reply_lib config_parser_lib Boost::log_setup Boost::log Boost::system Boost::regex pthread)
+target_link_libraries(webserver server_lib session_lib request_handler_lib echo_handler_lib error_handler file_handler_lib reply_lib config_parser_lib echo_handler_factory_lib static_handler_factory_lib Boost::log_setup Boost::log Boost::system Boost::regex pthread)
 
 
 # Test executable name, srcs, and deps
