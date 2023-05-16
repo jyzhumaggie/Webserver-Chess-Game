@@ -1,3 +1,4 @@
+#include <cerrno>
 #include <cstdlib>
 #include <iostream>
 #include <boost/bind.hpp>
@@ -60,12 +61,26 @@ bool session::start(std::vector<path> paths)
 }
 
 string session::match(map<std::string, request_handler_factory*> routes, string& url) {
-	
+    
+    std::string current_result = "/";
+
+    for ( auto it = routes.begin(); it != routes.end(); ++it  )
+    {
+        std::string location = it->first;
+        if (url.rfind(location, 0) == 0)
+        {
+            if (current_result.length() < location.length())
+            {
+                current_result = location;
+            }
+        }
+    } 
+	return current_result;
 }
 
 string session::handle_read(const boost::system::error_code& error,
 		size_t bytes_transferred)
-{
+{	    
     string complete_request = "";
 	if (!error)
 	{
@@ -75,13 +90,12 @@ string session::handle_read(const boost::system::error_code& error,
 			is.get(new_char);
 			complete_request += new_char;
 		}
-		BOOST_LOG_TRIVIAL(info) << "the size of routes_ in session is " << routes_.size();
 
-		auto factory = routes_["/echo/"];
 
 		file_handler handler("./",paths_);
 		reply new_reply;
-		handler_type handler_type = handler.parse(complete_request);
+		handler_type handler_type = handler.parse(complete_request);     
+
 		if (handler_type == staticHandler) {
 			//serve file
 			handler.handle_request(socket_);

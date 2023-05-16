@@ -32,6 +32,7 @@ public:
 
     std::string match(std::map<std::string, request_handler_factory*> routes, std::string& url);
     bool set_routes(std::map<std::string, request_handler_factory*> routes);
+    
 private:
     tcp::socket socket_;
     std::string clientIP_;

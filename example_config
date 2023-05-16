@@ -10,7 +10,7 @@ server {
     location /static1/ StaticHandler {
         root ../files/static1/;
     }
-    location /static2/ StaticHandler {
+    location /static1/abcdefg/ StaticHandler {
         root ../files/static2/;
     }
     
