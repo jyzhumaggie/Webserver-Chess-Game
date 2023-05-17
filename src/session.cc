@@ -10,7 +10,7 @@
 #include "echo_handler.h"
 #include "file_handler.h"
 #include "error_handler.h"
-#include <boost/log/trivial.hpp>
+
 #include <string>
 
 using boost::asio::ip::tcp;
@@ -45,15 +45,13 @@ bool session::start(std::vector<path> paths)
         boost::asio::ip::address remote_ad = remote_ep.address();
         clientIP_ = remote_ad.to_string();
     }
-
-  	boost::regex e("\r\n\r\n|\n\n");
-	boost::asio::async_read_until(socket_, 
-		request_, 
-		e,
+	
+	boost::beast::http::async_read(socket_,
+		buffer_,
+		request_,
 		boost::bind(&session::handle_read, this,
-			boost::asio::placeholders::error,
-			boost::asio::placeholders::bytes_transferred));
-
+				boost::asio::placeholders::error,
+				boost::asio::placeholders::bytes_transferred));
 
     BOOST_LOG_TRIVIAL(info) << "Client " << clientIP_ << " session started";
 
@@ -80,69 +78,68 @@ string session::match(map<std::string, request_handler_factory*> routes, string&
 
 string session::handle_read(const boost::system::error_code& error,
 		size_t bytes_transferred)
-{	    
+{
+	BOOST_LOG_TRIVIAL(info) << "-- in handle_read";
+	std::ostringstream ostring;
+	ostring << request_;
+	std::string request_string = ostring.str();
+	BOOST_LOG_TRIVIAL(info) << "Request_string is " << request_string;
+	BOOST_LOG_TRIVIAL(info) << "Request_string target is " << std::string(request_.target());
     string complete_request = "";
+
 	if (!error)
 	{
-		istream is(&request_);
-		while (complete_request.find("\r\n\r\n") == -1 && complete_request.find("\n\n") == -1 ) {
-			char new_char;
-			is.get(new_char);
-			complete_request += new_char;
-		}
+		string loc = std::string(request_.target());
+		std::string location = match(routes_, loc);
+		BOOST_LOG_TRIVIAL(info) << "TARGET Is ==== " << location;
 
+		if (routes_.find(location) == routes_.end()) {
+			BOOST_LOG_TRIVIAL(info) << "not found in routes_!";
+			// 404 handler
+		} else {
+			BOOST_LOG_TRIVIAL(info) << "Exists here!!";
 
-		file_handler handler("./",paths_);
-		reply new_reply;
-		handler_type handler_type = handler.parse(complete_request);     
+			request_handler_factory* factory = routes_[location];
+			
+			request_handler* handler = factory->create(location, loc);
 
-		if (handler_type == staticHandler) {
-			//serve file
-			handler.handle_request(socket_);
-			BOOST_LOG_TRIVIAL(info)<< "Client " << clientIP_ << " issues valid request to static handler: " << complete_request;
+			boost::beast::http::response <boost::beast::http::dynamic_body> response;
+
+			handler->serve(request_, response);
+			boost::beast::http::write(socket_, response);
 		}
-		else if(handler_type == echoHandler) {
-			echo_handler echoer("");
-			echoer.parse(complete_request);
-			echoer.handle_request(socket_);
-			BOOST_LOG_TRIVIAL(info) << "Client " << clientIP_ << " issues valid request to echo handler: " << complete_request;
-		}
-		else
-		{
-			error_handler error_handler("");
-			error_handler.parse(complete_request);
-			error_handler.handle_request(socket_);
-			BOOST_LOG_TRIVIAL(info) << "Client " << clientIP_ << " issues invalid request: " << complete_request;
-		}
+		complete_request = request_string;
+		BOOST_LOG_TRIVIAL(info) << "parsed correctly\n";
+
 
 		handle_write(error);
 	}
 	else
 	{
-        BOOST_LOG_TRIVIAL(info)<<"Client "<<clientIP_<<" handle read incomplete";
+		BOOST_LOG_TRIVIAL(info) << "Client " << clientIP_ << " issues invalid request: " << complete_request;
+		delete this;
 	}
 	return complete_request;
 }
+
 
 bool session::handle_write(const boost::system::error_code& error)
 {
 	if (!error)
 	{
-		boost::regex e("\r\n\r\n|\n\n");
-
-		boost::asio::async_read_until(socket_,
-		request_, 
-		e,
+		boost::beast::http::async_read(socket_,
+		buffer_,
+		request_,
 		boost::bind(&session::handle_read, this,
-					boost::asio::placeholders::error,
-					boost::asio::placeholders::bytes_transferred));
-        
-        BOOST_LOG_TRIVIAL(info)<<"Client "<<clientIP_<<" handle write complete";
+				boost::asio::placeholders::error,
+				boost::asio::placeholders::bytes_transferred)
+		);
+        BOOST_LOG_TRIVIAL(info) << "Client " << clientIP_ << " handle write complete";
         return true;
 	}
 	else
 	{
-        BOOST_LOG_TRIVIAL(info)<<"Client "<<clientIP_<<" handle write incomplete";
+        BOOST_LOG_TRIVIAL(info) << "Client " << clientIP_ << " handle write incomplete";
         return false;
 	}
 }

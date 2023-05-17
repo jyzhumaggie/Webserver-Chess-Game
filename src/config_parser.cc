@@ -95,7 +95,6 @@ std::vector<path> NginxConfig::get_path_from_config() {
 						if (s.size() == 0) {
 							path current_path;
 							current_path.endpoint = child_statement->tokens_[1];
-							BOOST_LOG_TRIVIAL(info) << "Getting echo path: " << current_path.endpoint;
 							paths_.push_back(current_path);
 						}
 
@@ -109,7 +108,7 @@ std::vector<path> NginxConfig::get_path_from_config() {
 							path current_path;
                             current_path.endpoint = child_statement->tokens_[1];
 							current_path.root = location_statement->tokens_[1];
-							BOOST_LOG_TRIVIAL(info) << "Getting static path: " << current_path.endpoint;
+							// BOOST_LOG_TRIVIAL(info) << "Getting static path: " << current_path.endpoint;
 							paths_.push_back(current_path);
 						}
 						

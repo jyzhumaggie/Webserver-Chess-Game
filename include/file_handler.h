@@ -10,6 +10,9 @@
 #include <unordered_map>
 #include "config_parser.h"
 
+#include <boost/beast/core.hpp>
+#include <boost/beast/http.hpp>
+
 using namespace http::server;
 using boost::asio::ip::tcp;
 
@@ -31,11 +34,10 @@ using boost::asio::ip::tcp;
 
 class file_handler : public request_handler {
     public:
-        file_handler(std::string base_dir,std::vector<path> paths);
-        void handle_request(tcp::socket& socket);
-        
-    private:
-        std::unordered_map<std::string, std::string> ext_to_mime;
+        file_handler(std::string location, std::string request_url);
+        beast::http::status serve(const beast::http::request<beast::http::dynamic_body> req, beast::http::response<beast::http::dynamic_body>& res);
+
 };
+
 
 #endif

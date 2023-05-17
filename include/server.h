@@ -7,6 +7,8 @@
 #include "echo_handler_factory.h"
 #include "static_handler_factory.h"
 #include "request_handler_factory.h"
+#include "echo_handler_factory.h"
+#include "request_handler_factory.h"
 
 using boost::asio::ip::tcp;
 

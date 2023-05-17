@@ -5,6 +5,8 @@
 #include <boost/log/trivial.hpp>
 #include "config_parser.h"
 #include "request_handler.h"
+#include "file_handler.h"
+#include "echo_handler.h"
 
 /*
  * Parent class for request handler factory object.
@@ -14,7 +16,8 @@
 
 class request_handler_factory {
     public:
-        virtual request_handler* create(const std::string& location, NginxConfig& config) = 0;
+        virtual request_handler* create(const std::string& location, const std::string& url) = 0;
+
 };
 
 #endif

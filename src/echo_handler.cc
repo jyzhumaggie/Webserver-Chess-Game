@@ -1,17 +1,19 @@
 #include "echo_handler.h"
 #include "request_handler.h"
 
-echo_handler::echo_handler(std::string base_dir) : request_handler(base_dir,paths_) {
+echo_handler::echo_handler(string location, string request_url){
+
 }
 
-void echo_handler::handle_request(tcp::socket& socket) {
-    reply reply_;
-    reply_.status = reply::ok;
-    reply_.content = complete_request;
-    reply_.headers.resize(2);
-    reply_.headers[0].name = "Content-Length";
-    reply_.headers[0].value = std::to_string(complete_request.size());
-    reply_.headers[1].name = "Content-Type";
-    reply_.headers[1].value = "text/html";
-    boost::asio::write(socket, reply_.to_buffers());
+beast::http::status echo_handler::serve(const beast::http::request<beast::http::dynamic_body> req, beast::http::response<beast::http::dynamic_body>& res){
+    BOOST_LOG_TRIVIAL(info) << "Echo_handler servin! here!!";
+
+    std::string request_string = req.target().to_string();
+    res.result(boost::beast::http::status::ok);
+    boost::beast::ostream(res.body()) << req;
+    
+    res.content_length((res.body().size()));
+    res.set(boost::beast::http::field::content_type, "text/plain");
+    
+    return res.result();
 }

@@ -25,10 +25,10 @@ using boost::asio::ip::tcp;
  * with proper headers and status codes
  */
 
-class error_handler : public request_handler {
-    public:
-        error_handler(std::string base_dir);
-        void handle_request(tcp::socket& socket);
-};
+// class error_handler : public request_handler {
+//     public:
+//         error_handler(std::string base_dir);
+//         void handle_request(tcp::socket& socket);
+// };
 
 #endif

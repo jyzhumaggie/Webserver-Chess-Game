@@ -56,7 +56,7 @@ void log_init()
 }
 
 void signal_handler(int signal)
-{
+{	
 	BOOST_LOG_TRIVIAL(fatal) << "Received signal: " << signal << ", exiting\n";
 	exit(signal);
 }
@@ -98,7 +98,6 @@ int main(int argc, char* argv[])
 		std::vector<path> paths = config.get_path_from_config();
 
 		std::map<std::string, std::string> handler_names = config.get_handler_types();
-
 		server s(io_service, port, paths, config, handler_names);
 		BOOST_LOG_TRIVIAL(info) << "Accepting connections\n";
 

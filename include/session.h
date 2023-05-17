@@ -5,7 +5,12 @@
 #include <iostream>
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
+#include <boost/log/trivial.hpp>
 
+#include <boost/beast/core/buffers_to_string.hpp>
+#include <boost/beast/core.hpp>
+#include <boost/beast/http.hpp>
+#include <boost/beast/version.hpp>
 #include "reply.h"
 #include "config_parser.h"
 #include "request_handler_factory.h"
@@ -33,11 +38,13 @@ public:
 
     bool start(std::vector<path> paths);
 
+    bool is_request_complete(const boost::beast::error_code& ec, std::size_t bytes_transferred);
     std::string handle_read(const boost::system::error_code& error, size_t bytes_transferred);
 
     bool handle_write(const boost::system::error_code& error);
 
-    boost::asio::streambuf request_;
+    boost::beast::http::request<boost::beast::http::dynamic_body> request_;
+    boost::asio::streambuf buffer_;
 
     std::string match(std::map<std::string, request_handler_factory*> routes, std::string& url);
     bool set_routes(std::map<std::string, request_handler_factory*> routes);
@@ -49,7 +56,6 @@ private:
     enum { max_length = 1024 };
     NginxConfig config_;
     std::map<std::string, request_handler_factory*> routes_;
-
 };
 
 #endif

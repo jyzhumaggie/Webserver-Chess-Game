@@ -10,8 +10,11 @@
 #include <boost/asio.hpp>
 #include <iostream>
 
+
+
 using namespace http::server;
 using boost::asio::ip::tcp;
+using namespace std;
 
 /**
  * echo_handler class
@@ -27,8 +30,9 @@ using boost::asio::ip::tcp;
 
 class echo_handler : public request_handler {
     public:
-        echo_handler(std::string base_dir);
-        void handle_request(tcp::socket& socket);
+        echo_handler(string location, string request_url);
+        beast::http::status serve(const beast::http::request<beast::http::dynamic_body> req, beast::http::response<beast::http::dynamic_body>& res);
+
 };
 
 #endif
