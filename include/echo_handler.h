@@ -13,6 +13,18 @@
 using namespace http::server;
 using boost::asio::ip::tcp;
 
+/**
+ * echo_handler class
+ *
+ * Inherits from request_handler class
+ *
+ * The echo handler constructs proper echo response based on root directory 
+ * and vector of paths that is provided to it
+ *
+ * The function handle_request constructs the echo response
+ * with the proper status codes, content, and headers.
+ */
+
 class echo_handler : public request_handler {
     public:
         echo_handler(std::string base_dir);

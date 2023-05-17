@@ -6,7 +6,6 @@
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
 
-// #include "session.h"
 #include "reply.h"
 #include "config_parser.h"
 #include "request_handler_factory.h"
@@ -14,6 +13,16 @@
 
 using boost::asio::ip::tcp;
 using http::server::reply;
+
+/**
+ * Session class
+ * 
+ * Session objects contain socket information and
+ * data that is passed from a read or write operation
+ *
+ * The functions handle_read and handle_write both use
+ * the boost library to write to a designated socket or read from one respectively
+ */
 
 class session
 {

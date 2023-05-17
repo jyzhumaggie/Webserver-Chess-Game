@@ -7,6 +7,15 @@
 
 #include "header.h"
 
+/** 
+ * reply module
+ *
+ * initializes struct of possible replies with all the status and error codes
+ * 
+ * stock_replies defines the HTML format for the status/error messages to be 
+ * delivered by the server for the the status codes described in the reply struct 
+ */
+
 namespace http {
     namespace server {
         namespace misc_strings {
@@ -47,8 +56,5 @@ namespace http {
         }
     }
 }
-
-
-
 
 #endif

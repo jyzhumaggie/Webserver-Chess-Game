@@ -4,12 +4,20 @@
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
 #include "config_parser.h"
-// #include <../src/session.cc>
 #include "echo_handler_factory.h"
 #include "static_handler_factory.h"
 #include "request_handler_factory.h"
 
 using boost::asio::ip::tcp;
+
+/**
+ * server class
+ *
+ * The function start_accept() creates a new session,
+ * and calls create_handle_factory() which delegates that task to either echo_handle_factory
+ * or static_handle_factory depending on the type of request. 
+ * This in turn starts the server.
+ */
 
 class server
 {

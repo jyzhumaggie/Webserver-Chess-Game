@@ -29,6 +29,7 @@ class NginxConfig {
   std::string ToString(int depth = 0);
   std::vector<std::shared_ptr<NginxConfigStatement>> statements_;
   int get_port_from_config(const NginxConfig* config);
+  //line below creates a vector of path each consisting of root and endpoint  
   std::vector<path>  get_path_from_config();
   std::map<std::string, std::string> get_handler_types();
 

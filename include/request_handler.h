@@ -12,6 +12,11 @@
 using namespace http::server;
 using boost::asio::ip::tcp;
 
+/** 
+ * Parent class for echo, file, and error handler objects.
+ * request_handler returns a HTTP reply given different requests that are received.
+ */
+
 enum handler_type {staticHandler, echoHandler, errorHandler};
 
 class request_handler {
