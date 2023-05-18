@@ -29,6 +29,7 @@ tcp::socket& session::socket()
 
 bool session::set_routes(std::map<std::string, request_handler_factory*> routes){
 	routes_ = routes;
+    return true;
 }
 
 bool session::start(std::vector<path> paths)
@@ -106,7 +107,6 @@ bool session::handle_read(const boost::system::error_code& error,
 	}
 	else
 	{
-		delete this;
         return false;
 	}
 }
@@ -129,7 +129,6 @@ bool session::handle_write(const boost::system::error_code& error)
 	else
 	{
         BOOST_LOG_TRIVIAL(info) << "Client " << clientIP_ << " handle write incomplete";
-        delete this;
         return false;
 	}
 }
