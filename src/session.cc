@@ -8,9 +8,8 @@
 #include <sstream>
 #include "reply.h"
 #include "echo_handler.h"
-#include "file_handler.h"
+#include "static_handler.h"
 #include "not_found_handler.h"
-#include "error_handler.h"
 
 #include <string>
 
@@ -77,14 +76,9 @@ string session::match(map<std::string, request_handler_factory*> routes, string&
 	return current_result;
 }
 
-string session::handle_read(const boost::system::error_code& error,
+bool session::handle_read(const boost::system::error_code& error,
 		size_t bytes_transferred)
 {
-	std::ostringstream ostring;
-	ostring << request_;
-	std::string request_string = ostring.str();
-    string complete_request = "";
-
 	if (!error)
 	{
 		string loc = std::string(request_.target());
@@ -108,18 +102,13 @@ string session::handle_read(const boost::system::error_code& error,
 
 
 		handle_write(error);
+        return true;
 	}
 	else
 	{
-		BOOST_LOG_TRIVIAL(info) << "Client " << clientIP_ << " issues invalid request: " << complete_request;
-		string loc = std::string(request_.target());
-		request_handler* handler = new error_handler("", "");
-		boost::beast::http::response <boost::beast::http::dynamic_body> response;
-		handler->serve(request_, response);
-		boost::beast::http::write(socket_, response);
 		delete this;
+        return false;
 	}
-	return complete_request;
 }
 
 
@@ -140,6 +129,7 @@ bool session::handle_write(const boost::system::error_code& error)
 	else
 	{
         BOOST_LOG_TRIVIAL(info) << "Client " << clientIP_ << " handle write incomplete";
+        delete this;
         return false;
 	}
 }

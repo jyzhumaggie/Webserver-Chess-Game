@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "file_handler.h"
+#include "static_handler.h"
 #include "gmock/gmock.h"
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
@@ -8,7 +8,7 @@
 using namespace testing;
 using namespace http::server; 
 
-class FileHandlerTestFixture : public ::testing::Test {
+class StaticHandlerTestFixture : public ::testing::Test {
  protected:
 };
 

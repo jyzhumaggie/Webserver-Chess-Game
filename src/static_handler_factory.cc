@@ -13,5 +13,5 @@ request_handler* static_handler_factory::create(const std::string& location, con
 {
 
     //TODO: will need to be later changed to new static_handler(const std::string& location,NginxConfig& config)
-    return new file_handler(location, url, config_);
+    return new static_handler(location, url, config_);
 }

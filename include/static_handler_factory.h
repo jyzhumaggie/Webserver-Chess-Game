@@ -41,7 +41,7 @@
 #include "config_parser.h"
 #include "request_handler.h"
 #include "echo_handler.h"
-#include "file_handler.h"
+#include "static_handler.h"
 
 /**
  * echo_handler_factory class inherits from request_handler_factory class

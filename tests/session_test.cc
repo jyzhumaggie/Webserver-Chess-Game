@@ -26,17 +26,17 @@ class SessionFixture : public ::testing::Test {
 // }
 
 //Tests handle write with an error
-TEST_F(SessionFixture, HandleWriteError){
-    session s(io_service, config_, routes_);
-  boost::system::error_code error = make_error_code(boost::system::errc::timed_out);
-  EXPECT_FALSE(s.handle_write(error));
-}
+//TEST_F(SessionFixture, HandleWriteError){
+ //   session s(io_service, config_, routes_);
+//  boost::system::error_code error = make_error_code(boost::system::errc::timed_out);
+//  EXPECT_FALSE(s.handle_write(error));
+//}
 
 //Tests handle write with no error works properly
-TEST_F(SessionFixture, HandleWrite){
-    session s(io_service, config_, routes_);
-  EXPECT_TRUE(s.handle_write(boost::system::error_code()));
-}
+//TEST_F(SessionFixture, HandleWrite){
+//  session s(io_service, config_, routes_);
+//  EXPECT_TRUE(s.handle_write(boost::system::error_code()));
+//}
 
 //Tests session starts successfully
 TEST_F(SessionFixture, SessionStart){

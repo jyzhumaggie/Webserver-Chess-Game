@@ -1,5 +1,5 @@
 HTTP/1.1 404 Not Found
-Content-Length: 48
-Content-Type: text/html
+Content-Length: 85
+Content-Type: text/plain
 
-<html><body><h1>404 NOT FOUND</h1></body></html>
+<html><head><title>Not Found</title></head><body><h1>404 Not Found</h1></body></html>

@@ -5,7 +5,7 @@
 #include <boost/log/trivial.hpp>
 #include "config_parser.h"
 #include "request_handler.h"
-#include "file_handler.h"
+#include "static_handler.h"
 #include "echo_handler.h"
 
 /*

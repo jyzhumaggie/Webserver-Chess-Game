@@ -25,14 +25,14 @@ TEST_1_RESULT=0
 
 if [ $RESULT -eq 0 ];
 then
-    TEST_1_RESULT=1
-    echo "Test 1 Success"
+   TEST_1_RESULT=1
+   echo "Test 1 Success"
 else
-    echo "Test 1 Fail"
+   echo "Test 1 Fail"
 fi
 
-#Test 2: testing a correct response through nc
-echo -e "hello\n\n" | timeout $TIMEOUT nc $SERVER_IP $SERVER_PORT > temp_file_test2
+#Test 2: testing a correct echo response through nc
+echo -e "GET /echo/testing HTTP/1.1\r\n\r\n" | timeout $TIMEOUT nc $SERVER_IP $SERVER_PORT > temp_file_test2
 
 diff temp_file_test2 integration_test2_result
 
@@ -66,7 +66,7 @@ fi
 
 #Test 4: testing retrieval of static file
 
-echo -e "GET /static1/hello.txt HTTP/1.1\n\n" | timeout $TIMEOUT nc $SERVER_IP $SERVER_PORT > temp_file_test4
+echo -e "GET /static1/hello.txt HTTP/1.1\r\n\r\n" | timeout $TIMEOUT nc $SERVER_IP $SERVER_PORT > temp_file_test4
 
 diff temp_file_test4 integration_test4_result
 
@@ -83,7 +83,7 @@ fi
 
 #Test 5: testing invalid static file
 
-echo -e "GET /static1/helloy.txt HTTP/1.1\n\n" | timeout $TIMEOUT nc $SERVER_IP $SERVER_PORT > temp_file_test5
+echo -e "GET /static1/helloy.txt HTTP/1.1\r\n\r\n" | timeout $TIMEOUT nc $SERVER_IP $SERVER_PORT > temp_file_test5
 
 diff temp_file_test5 integration_test5_result
 

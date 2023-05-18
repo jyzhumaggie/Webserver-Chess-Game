@@ -39,7 +39,7 @@ public:
     bool start(std::vector<path> paths);
 
     bool is_request_complete(const boost::beast::error_code& ec, std::size_t bytes_transferred);
-    std::string handle_read(const boost::system::error_code& error, size_t bytes_transferred);
+    bool handle_read(const boost::system::error_code& error, size_t bytes_transferred);
 
     bool handle_write(const boost::system::error_code& error);
 

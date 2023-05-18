@@ -1,5 +1,5 @@
-#ifndef FILE_HANDLER_H
-#define FILE_HANDLER_H
+#ifndef STATIC_HANDLER_H
+#define STATIC_HANDLER_H
 
 #include <string>
 #include <vector>
@@ -17,11 +17,11 @@ using namespace http::server;
 using boost::asio::ip::tcp;
 
 /** 
- * file_handler class
+ * static_handler class
  *
  * Inherits from request_handler
  *
- * The file_handler constructs proper echo response checks to ensure that passed in
+ * The static_handler constructs proper echo response checks to ensure that passed in
  * file path is correct based on list of acceptable mime file types
  *
  * The handle_request method constructs the proper response for the given file path.
@@ -32,9 +32,9 @@ using boost::asio::ip::tcp;
  *
  */
 
-class file_handler : public request_handler {
+class static_handler : public request_handler {
     public:
-        file_handler(std::string location, std::string request_url, NginxConfig& config);
+        static_handler(std::string location, std::string request_url, NginxConfig& config);
         beast::http::status serve(const beast::http::request<beast::http::dynamic_body> req, beast::http::response<beast::http::dynamic_body>& res);
         std::string get_reply(int err_code);
 
@@ -42,7 +42,7 @@ class file_handler : public request_handler {
         std::string location_;
         std::string request_url_;
         NginxConfig config_;
-
+        std::unordered_map<std::string, std::string> ext_to_mime;
 };
 
 
