@@ -62,7 +62,7 @@ Right now, the static handler statements have a root argument that declares the 
 
 
 # RequestHandler Interface
-NEEDS TO BE COMPLETED
+The base class for all request handlers is called request_handler, and it is declared in include/request_handler.h. The class contains only a virtual function serve which takes in two arguments: boost::beast request and boost::beast response objects. The function then returns a boost::beast status type.
 
 ## Example of a RequestHandler Child Class
 **echo_handler.h**
@@ -97,7 +97,7 @@ using boost::asio::ip::tcp;
 class echo_handler : public request_handler {
     public:
         echo_handler(std::string base_dir);
-        void handle_request(tcp::socket& socket);
+        void serve(const beast::http::request<beast::http::dynamic_body> req, beast::http::response<beast::http::dynamic_body>& res);
 };
 
 #endif
@@ -108,20 +108,22 @@ class echo_handler : public request_handler {
 #include "echo_handler.h"
 #include "request_handler.h"
 
-echo_handler::echo_handler(std::string base_dir) : request_handler(base_dir,paths_) {
+echo_handler::echo_handler(string location, string request_url){
+
 }
 
-void echo_handler::handle_request(tcp::socket& socket) {
-    reply reply_;
-    reply_.status = reply::ok;
-    reply_.content = complete_request;
-    reply_.headers.resize(2);
-    reply_.headers[0].name = "Content-Length";
-    reply_.headers[0].value = std::to_string(complete_request.size());
-    reply_.headers[1].name = "Content-Type";
-    reply_.headers[1].value = "text/html";
-    boost::asio::write(socket, reply_.to_buffers());
+beast::http::status echo_handler::serve(const beast::http::request<beast::http::dynamic_body> req, beast::http::response<beast::http::dynamic_body>& res){
+
+    std::string request_string = req.target().to_string();
+    res.result(boost::beast::http::status::ok);
+    boost::beast::ostream(res.body()) << req;
+    
+    res.content_length((res.body().size()));
+    res.set(boost::beast::http::field::content_type, "text/plain");
+    
+    return res.result();
 }
+
 ```
 The different handler constructors will take in different values depending on what is needed. For example, the echo location takes in 1 string parameter: the location of the files to be served.
 
@@ -132,10 +134,10 @@ In the source file, include the header file of this new request handler and any 
 
 
 
-# RequestHandlerFactory Interface
+# Request_handler_factory Interface
 The request handler factory interface consists of a create function. The create function is a pure virtual function and it is inherited and overridden by other request handler factories in the program. The create function takes in a string with the location and an nginx config file and returns a request_handler pointer.
 
-## Example of a RequestHandlerFactory Child Class
+## Example of a Request_handler_factory Child Class
 **echo_handler_factory.h**
 ```
 #ifndef ECHO_HANDLER_FACTORY_H
@@ -189,5 +191,5 @@ The create function is inherited from the request_handler_factory interface and 
 
 
 
-## Adding Another RequestHandlerFactory
-NEEDS TO BE DONE
+## Adding Another Request_handler_factory
+To create a new derived class from request_handler_factory, create a corresponding header and source file in the include folder. In the header file, include the parant class `request_handler_factory.h`. Note that request_handler_factory should declare the constructors and inherited functions public, and it should make other variables private. In the source file, include the header file of the new request handler factory, other needed header files, and useful libraries. Afterwards, proceed to implement the constructor and create function.

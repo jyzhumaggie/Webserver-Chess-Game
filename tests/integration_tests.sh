@@ -100,11 +100,11 @@ fi
 
 #Clean up (remove temp files and kill server)
 kill $SERVER_PID
-rm temp_file_test1
-rm temp_file_test2
 rm temp_file_test3
-rm temp_file_test4
+rm temp_file_test1
 rm temp_file_test5
+rm temp_file_test2
+rm temp_file_test4
 
 
 #Either exit 0 or exit 1 if tests pass or not

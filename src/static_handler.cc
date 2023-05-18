@@ -87,6 +87,12 @@ beast::http::status static_handler::serve(const beast::http::request<beast::http
 
         if(search == location_)
         {
+            //handles optional trailing slash for root
+            if (replace.back()!='/')
+            {
+                replace += "/";
+            }
+
             size_t pos = request_path.find(search);
             request_path.replace(pos, search.length(), replace);
             break;

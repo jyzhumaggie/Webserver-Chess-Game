@@ -21,9 +21,9 @@ server::server(boost::asio::io_service& io_service, short port, std::vector<path
 }
 
 void server::create_handler_factory(const std::string& name, NginxConfig& config, const std::string& endpoint) {
-	if (name == "EchoHandler") {
+	if (name == "echo_handler") {
 		routes_[endpoint] = new echo_handler_factory(endpoint, config);
-	} else if (name == "StaticHandler") {
+	} else if (name == "static_handler") {
 		routes_[endpoint] = new static_handler_factory(endpoint, config);
 	} else {
 		return ;
@@ -40,7 +40,12 @@ void server::start_accept()
 	BOOST_LOG_TRIVIAL(info) << "Start creating handler factories:\n";
 	while (it != handler_names_.end())
 	{
-		create_handler_factory(it->second, config_, it->first);
+		std::string end = it->first;
+		// handles optional trailing slash for endpoint
+		if (end.back() != '/') {
+			end += "/";
+		}
+		create_handler_factory(it->second, config_, end);
 		++it;
 	}
 	new_session->set_routes(routes_);
