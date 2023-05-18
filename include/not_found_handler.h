@@ -1,5 +1,5 @@
-#ifndef ERROR_HANDLER_H
-#define ERROR_HANDLER_H
+#ifndef NOT_FOUND_HANDLER_H
+#define NOT_FOUND_HANDLER_H
 
 #include <string>
 #include <vector>
@@ -26,9 +26,9 @@ using boost::asio::ip::tcp;
  */
 
 
-class error_handler : public request_handler {
+class not_found_handler : public request_handler {
     public:
-        error_handler(std::string location, std::string request_url);
+        not_found_handler(std::string location, std::string request_url);
         beast::http::status serve(const beast::http::request<beast::http::dynamic_body> req, beast::http::response<beast::http::dynamic_body>& res);
 
 };

@@ -82,7 +82,7 @@ beast::http::status file_handler::serve(const beast::http::request<beast::http::
         res.result(boost::beast::http::status::ok);
         boost::beast::ostream(res.body()) << reply_body;
         res.content_length((res.body().size()));
-        res.set(boost::beast::http::field::content_type, "text/html");
+        res.set(boost::beast::http::field::content_type, extension);
         
         fclose(fp);
         

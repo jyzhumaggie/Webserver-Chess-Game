@@ -9,6 +9,7 @@
 #include "reply.h"
 #include "echo_handler.h"
 #include "file_handler.h"
+#include "not_found_handler.h"
 #include "error_handler.h"
 
 #include <string>
@@ -79,37 +80,31 @@ string session::match(map<std::string, request_handler_factory*> routes, string&
 string session::handle_read(const boost::system::error_code& error,
 		size_t bytes_transferred)
 {
-	BOOST_LOG_TRIVIAL(info) << "-- in handle_read";
 	std::ostringstream ostring;
 	ostring << request_;
 	std::string request_string = ostring.str();
-	BOOST_LOG_TRIVIAL(info) << "Request_string is " << request_string;
-	BOOST_LOG_TRIVIAL(info) << "Request_string target is " << std::string(request_.target());
     string complete_request = "";
 
 	if (!error)
 	{
 		string loc = std::string(request_.target());
 		std::string location = match(routes_, loc);
-		BOOST_LOG_TRIVIAL(info) << "TARGET Is ==== " << location;
 
+		boost::beast::http::response <boost::beast::http::dynamic_body> response;
 		if (routes_.find(location) == routes_.end()) {
-			BOOST_LOG_TRIVIAL(info) << "not found in routes_!";
 			// 404 handler
+			request_handler* handler = new not_found_handler(location, loc);
+			handler->serve(request_, response);
+			boost::beast::http::write(socket_, response);
+			
 		} else {
-			BOOST_LOG_TRIVIAL(info) << "Exists here!!";
-
 			request_handler_factory* factory = routes_[location];
 			
 			request_handler* handler = factory->create(location, loc);
 
-			boost::beast::http::response <boost::beast::http::dynamic_body> response;
-
 			handler->serve(request_, response);
 			boost::beast::http::write(socket_, response);
 		}
-		complete_request = request_string;
-		BOOST_LOG_TRIVIAL(info) << "parsed correctly\n";
 
 
 		handle_write(error);
@@ -117,6 +112,11 @@ string session::handle_read(const boost::system::error_code& error,
 	else
 	{
 		BOOST_LOG_TRIVIAL(info) << "Client " << clientIP_ << " issues invalid request: " << complete_request;
+		string loc = std::string(request_.target());
+		request_handler* handler = new error_handler("", "");
+		boost::beast::http::response <boost::beast::http::dynamic_body> response;
+		handler->serve(request_, response);
+		boost::beast::http::write(socket_, response);
 		delete this;
 	}
 	return complete_request;
