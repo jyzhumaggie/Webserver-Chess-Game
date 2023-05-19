@@ -2,6 +2,7 @@
 #include <iostream>
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
+#include "crud_handler_factory.h"
 #include "session.h"
 #include "server.h"
 #include <boost/log/trivial.hpp>
@@ -25,6 +26,8 @@ void server::create_handler_factory(const std::string& name, NginxConfig& config
 		routes_[endpoint] = new echo_handler_factory(endpoint, config);
 	} else if (name == "static_handler") {
 		routes_[endpoint] = new static_handler_factory(endpoint, config);
+	} else if (name == "crud_handler") {
+		routes_[endpoint] = new crud_handler_factory(endpoint, config);
 	} else {
 		return ;
 	}
