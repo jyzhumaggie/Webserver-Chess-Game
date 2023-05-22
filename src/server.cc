@@ -23,12 +23,11 @@ server::server(boost::asio::io_service& io_service, short port, std::vector<path
 
 void server::create_handler_factory(const std::string& name, NginxConfig& config, const std::string& endpoint) {
 	if (name == "echo_handler") {
-		routes_[endpoint] = new echo_handler_factory(endpoint, config, &entities_);
+		routes_[endpoint] = new echo_handler_factory(endpoint, config);
 	} else if (name == "static_handler") {
-		routes_[endpoint] = new static_handler_factory(endpoint, config, &entities_);
+		routes_[endpoint] = new static_handler_factory(endpoint, config);
 	} else if (name == "crud_handler") {
-		BOOST_LOG_TRIVIAL(info) << "### CRUD HANDLER FACTORY CREATED:\n";
-		routes_[endpoint] = new crud_handler_factory(endpoint, config, &entities_);
+		routes_[endpoint] = new crud_handler_factory(endpoint, config);
 	} else {
 		return ;
 	}
