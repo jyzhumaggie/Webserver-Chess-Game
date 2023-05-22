@@ -107,7 +107,7 @@ http::status crud_handler::serve(const http::request<http::dynamic_body> req, ht
         case http::verb::post:
             return handle_create(req, res);
         case http::verb::get:
-            if (req.target().substr(location_.size()).find_first_not_of("/") == std::string::npos) {
+            if (id_ == 0) {
                 return handle_list(req, res);
             }
 
