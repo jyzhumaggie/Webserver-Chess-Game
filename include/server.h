@@ -40,6 +40,7 @@ class server
         static_handler_factory* static_handler_factory_;
         std::map<std::string, std::string> handler_names_;
         std::map<std::string, request_handler_factory*> routes_;
+        std::map<std::string, std::set<int>> entities_;
         NginxConfig config_;
 };
 

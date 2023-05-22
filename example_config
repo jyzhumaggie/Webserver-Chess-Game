@@ -13,5 +13,7 @@ server {
     location /static1/abcdefg/ static_handler {
         root ../files/static2/;
     }
-    
+    location /resource/ crud_handler{
+        data_path ../files/crud/;
+    }
 }

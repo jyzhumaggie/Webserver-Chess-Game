@@ -101,7 +101,9 @@ std::vector<path> NginxConfig::get_path_from_config() {
 					}
 					for (auto location_statement : child_statement->child_block_->statements_)
 					{
-						if (location_statement->tokens_[0] == "root" && 
+						if (
+							(location_statement->tokens_[0] == "root" || 
+							location_statement->tokens_[0] == "data_path") && 
 							location_statement->tokens_.size() >= 2 && 
 							child_statement->child_block_.get() != nullptr)         
 						{

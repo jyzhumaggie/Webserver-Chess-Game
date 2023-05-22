@@ -4,7 +4,7 @@
 // Note: delete after updating static_handler
 #include "config_parser.h"
 
-static_handler_factory::static_handler_factory(const std::string& path, NginxConfig& config) {
+static_handler_factory::static_handler_factory(const std::string& path, NginxConfig& config, std::map<std::string, std::set<int>>* entities) {
     location_ = path;
     config_ = config;
 }

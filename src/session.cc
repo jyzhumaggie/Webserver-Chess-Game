@@ -5,6 +5,7 @@
 #include <boost/asio.hpp>
 #include "session.h"
 #include <boost/regex.hpp>
+#include <boost/log/trivial.hpp>
 #include <sstream>
 #include "reply.h"
 #include "echo_handler.h"
@@ -94,7 +95,6 @@ bool session::handle_read(const boost::system::error_code& error,
 			
 		} else {
 			request_handler_factory* factory = routes_[location];
-			
 			request_handler* handler = factory->create(location, loc);
 
 			handler->serve(request_, response);
