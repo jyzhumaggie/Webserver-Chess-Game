@@ -1,6 +1,6 @@
 #include "echo_handler_factory.h"
 
-echo_handler_factory::echo_handler_factory(const std::string& path, NginxConfig& config) {
+echo_handler_factory::echo_handler_factory(const std::string& path, NginxConfig& config, std::map<std::string, std::set<int>>* entities) {
     location_ = path;
     config_ = config;
 }
