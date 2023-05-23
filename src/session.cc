@@ -96,7 +96,6 @@ bool session::handle_read(const boost::system::error_code& error,
 		} else {
 			request_handler_factory* factory = routes_[location];
 			request_handler* handler = factory->create(location, loc);
-
 			handler->serve(request_, response);
 			boost::beast::http::write(socket_, response);
 		}

@@ -68,7 +68,6 @@ http::status generate_error_response(http::response<http::dynamic_body>& res, ht
 }
 
 crud_handler::crud_handler(std::string location, std::string request_url, NginxConfig& config, std::map<std::string, std::set<int>>* entities) {
-    
     location_ = location;
     request_url_ = request_url;
     config_ = config;

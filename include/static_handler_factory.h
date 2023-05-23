@@ -38,8 +38,6 @@
 
 #include "request_handler_factory.h"
 #include <string>
-#include <map>
-#include <set>
 #include "config_parser.h"
 #include "request_handler.h"
 #include "echo_handler.h"
@@ -56,7 +54,7 @@
 
 class static_handler_factory : public request_handler_factory {
     public:
-    static_handler_factory(const std::string& path, NginxConfig& config, std::map<std::string, std::set<int>>* entities);
+    static_handler_factory(const std::string& path, NginxConfig& config);
     request_handler* create(const std::string& location, const std::string& url);
     
     private:

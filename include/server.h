@@ -25,7 +25,7 @@ class server
 {
     public:
         server(boost::asio::io_service& io_service, short port, std::vector<path> paths, NginxConfig& config, std::map<std::string, std::string> handler_names);
-
+        ~server();
         void create_handler_factory(const std::string& name, NginxConfig& config, const std::string& endpoint);
     private:
         void start_accept();
@@ -40,7 +40,8 @@ class server
         static_handler_factory* static_handler_factory_;
         std::map<std::string, std::string> handler_names_;
         std::map<std::string, request_handler_factory*> routes_;
-        std::map<std::string, std::set<int>> entities_;
+        std::map<std::string, std::map<std::string, std::set<int>>*> crud_endpoints_; // {endpoint, pointer to the map of entities and ids}
+
         NginxConfig config_;
 };
 

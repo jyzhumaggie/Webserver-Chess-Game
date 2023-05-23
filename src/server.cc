@@ -18,16 +18,29 @@ server::server(boost::asio::io_service& io_service, short port, std::vector<path
 	config_ = config;
 	echo_handler_factory_ = nullptr;
 	static_handler_factory_ = nullptr;	
+	// build crud_endpoints_
+	for(auto itr : handler_names){
+		if(itr.second == "crud_handler"){
+			std::map<std::string, std::set<int>>* ptr = new std::map<std::string, std::set<int>>;
+			crud_endpoints_.insert({itr.first, ptr});
+		}
+	}
 	start_accept();
+}
+
+server::~server(){
+	for(auto itr : crud_endpoints_){
+		delete itr.second;
+	}
 }
 
 void server::create_handler_factory(const std::string& name, NginxConfig& config, const std::string& endpoint) {
 	if (name == "echo_handler") {
-		routes_[endpoint] = new echo_handler_factory(endpoint, config, &entities_);
+		routes_[endpoint] = new echo_handler_factory(endpoint, config);
 	} else if (name == "static_handler") {
-		routes_[endpoint] = new static_handler_factory(endpoint, config, &entities_);
+		routes_[endpoint] = new static_handler_factory(endpoint, config);
 	} else if (name == "crud_handler") {
-		routes_[endpoint] = new crud_handler_factory(endpoint, config, &entities_);
+		routes_[endpoint] = new crud_handler_factory(endpoint, config, crud_endpoints_[endpoint]);
 	} else {
 		return ;
 	}
