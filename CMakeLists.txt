@@ -83,6 +83,7 @@ gtest_discover_tests(echo_handler_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_
 
 if(NOT "${CMAKE_BUILD_TYPE}" STREQUAL "Coverage")
 add_test(NAME integration_tests COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/tests/integration_tests.sh WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+add_test(NAME crud_integration_tests COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/tests/crud_integration_test/crud_integration_test.sh WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 endif()
 
 
