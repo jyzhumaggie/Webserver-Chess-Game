@@ -9,11 +9,13 @@
 #include <fstream>
 #include <sstream>
 #include <filesystem>
+#include <nlohmann/json.hpp> // https://json.nlohmann.me/
 
 #include "config_parser.h"
 #include "request_handler.h"
 
 namespace http = boost::beast::http;
+using json = nlohmann::json;
 
 std::string get_entity(std::string location, std::string request_url){
     std::size_t entity_pos = request_url.find(location);
@@ -41,6 +43,7 @@ int get_id(std::string request_url, std::string entity, std::string location){
     }
     else{
         std::string id_str = request_url.substr(location_entity.size()+1);
+        if(id_str == "") return -1;
         id = std::stoi(id_str);
         return (id > 0)? id : -1;
     }
@@ -56,11 +59,12 @@ std::string get_data_path(NginxConfig& config, std::string location){
     return "";
 }
 
-void generate_error_response(http::response<http::dynamic_body>& res, http::status s, std::string msg){
+http::status generate_error_response(http::response<http::dynamic_body>& res, http::status s, std::string msg){
     res.result(s);
     boost::beast::ostream(res.body()) << msg;
     res.set(http::field::content_type, "text/plain");
     res.prepare_payload();
+    return s;
 }
 
 crud_handler::crud_handler(std::string location, std::string request_url, NginxConfig& config, std::map<std::string, std::set<int>>* entities) {
@@ -91,16 +95,13 @@ crud_handler::crud_handler(std::string location, std::string request_url, NginxC
 
 http::status crud_handler::serve(const http::request<http::dynamic_body> req, http::response<http::dynamic_body>& res) {
     if(entity_ == ""){
-        generate_error_response(res, http::status::bad_request, "Invalid entity");
-        return http::status::bad_request;
+        return generate_error_response(res, http::status::bad_request, "Invalid entity");
     }
     if(data_path_ == ""){
-        generate_error_response(res, http::status::bad_request, "Invalid data path");
-        return http::status::bad_request;
+        return generate_error_response(res, http::status::bad_request, "Invalid data path");
     }
     if(id_ == -1){
-        generate_error_response(res, http::status::bad_request, "Invalid id");
-        return http::status::bad_request;
+        return generate_error_response(res, http::status::bad_request, "Invalid id");
     }
 
     switch(req.method()) {
@@ -110,21 +111,32 @@ http::status crud_handler::serve(const http::request<http::dynamic_body> req, ht
             if (id_ == 0) {
                 return handle_list(req, res);
             }
-
             return handle_retrieve(req, res);
         case http::verb::put:
             return handle_update(req, res);
         case http::verb::delete_:
             return handle_delete(req, res);
         default:
-            generate_error_response(res, http::status::method_not_allowed, "Method not allowed");
-            return res.result();
+            return generate_error_response(res, http::status::method_not_allowed, "Method not allowed");
     }
 }
 
 http::status crud_handler::handle_create(const http::request<http::dynamic_body> req, http::response<http::dynamic_body>& res) {
     BOOST_LOG_TRIVIAL(debug) << "Handling create CRUD\n";
 
+    std::string req_body = boost::beast::buffers_to_string(req.body().data());
+
+    // validate JSON request body
+    json j;
+    try{
+        j = json::parse(req_body);
+    }
+    catch (json::parse_error& ex){
+        BOOST_LOG_TRIVIAL(error) << "JSON error: request body is not a valid JSON file\n";
+        return generate_error_response(res, http::status::bad_request, "Invalid JSON request body");
+    }
+
+    // create a new entity if needed
     if(entities_->find(entity_) == entities_->end()){
         entities_->insert({entity_, std::set<int>{}});
         std::filesystem::create_directory(data_path_ + entity_);
@@ -143,26 +155,24 @@ http::status crud_handler::handle_create(const http::request<http::dynamic_body>
         id_ = smallest_available_id;
     }
     else{
-        if(entities_->find(entity_)->second.find(id_) != entities_->find(entity_)->second.end()){
-            BOOST_LOG_TRIVIAL(error) << "Repeated id specified in CRUD create, no file is created\n";
-            generate_error_response(res, http::status::bad_request, "Repeated id specified in CRUD create");
-            return http::status::bad_request;
-        }
+        BOOST_LOG_TRIVIAL(error) << "Id specified in CRUD create, no file is created\n";
+        return generate_error_response(res, http::status::bad_request, "Id specified in CRUD create");
     }
     entities_->find(entity_)->second.insert(id_);
         
     // write data to file
     std::string file_path = data_path_ + entity_ + "/" + std::to_string(id_);
     std::ofstream File(file_path);
-    File << boost::beast::buffers_to_string(req.body().data());
+    File << req_body;
     File.close();
 
-    // create response
-    boost::beast::ostream(res.body()) << std::to_string(id_);
+    // create JSON response
+    std::string res_body = "{\"id\": " + std::to_string(id_) + "}";
+    boost::beast::ostream(res.body()) << res_body;
     res.content_length((res.body().size()));
-    res.set(boost::beast::http::field::content_type, "text/plain");
-
-    return http::status::ok;
+    res.set(boost::beast::http::field::content_type, "application/json");
+    res.result(http::status::created);
+    return http::status::created;
 }
 
 http::status crud_handler::handle_retrieve(const http::request<http::dynamic_body> req, http::response<http::dynamic_body>& res) {
@@ -170,8 +180,7 @@ http::status crud_handler::handle_retrieve(const http::request<http::dynamic_bod
 
     if(entities_->find(entity_)->second.find(id_) == entities_->find(entity_)->second.end()){
         BOOST_LOG_TRIVIAL(error) << "Invalid id specified in CRUD retrieve\n";
-        generate_error_response(res, http::status::not_found, "Invalid id specified in CRUD retrieve");
-        return http::status::not_found;
+        return generate_error_response(res, http::status::not_found, "Invalid id specified in CRUD retrieve");
     }
 
     std::string file_path = data_path_ + entity_ + "/" + std::to_string(id_);
@@ -179,32 +188,107 @@ http::status crud_handler::handle_retrieve(const http::request<http::dynamic_bod
     // read data from file
     std::ifstream File(file_path);
     std::string data;
-    File >> data;
+    char ch;
+    while(true){
+        File.get(ch);
+        if( File.eof() ) break;
+        data += ch;
+    }
     File.close();
 
     // create response
     boost::beast::ostream(res.body()) << data;
     res.content_length((res.body().size()));
-    res.set(boost::beast::http::field::content_type, "text/plain");
-    // TODO: handle JSON writeout
-
+    res.set(boost::beast::http::field::content_type, "application/json");
+    res.result(http::status::ok);
     return http::status::ok;
 }
 
-http::status crud_handler::handle_update(const http::request<http::dynamic_body> req, http::response<http::dynamic_body>& res) {
-    // TODO: not implemented
+http::status crud_handler::handle_update(const http::request<http::dynamic_body> req, http::response<http::dynamic_body>& res) { 
     BOOST_LOG_TRIVIAL(debug) << "Handling update CRUD\n";
-    return http::status::ok;
+
+    if(id_ == 0){
+        return generate_error_response(res, http::status::bad_request, "No id specified in CRUD update");
+    }
+
+    if(entities_->find(entity_) == entities_->end()){
+        return generate_error_response(res, http::status::not_found, "No matched entity found");
+    }
+
+    // check the content to update, if it is not a JSON file, do not update
+    std::string req_body = boost::beast::buffers_to_string(req.body().data());
+
+    json j;
+    try{
+        j = json::parse(req_body);
+    }
+    catch (json::parse_error& ex){
+        BOOST_LOG_TRIVIAL(error) << "JSON error: request body is not a valid JSON file\n";
+        return generate_error_response(res, http::status::bad_request, "Invalid JSON request body");
+    }
+
+    // if the id exists, update the file
+    std::string file_path = data_path_ + entity_ + "/" + std::to_string(id_);
+    bool id_exists = false;
+    if(entities_->find(entity_)->second.find(id_) != entities_->find(entity_)->second.end()){
+        id_exists = true;
+        std::ofstream File(file_path, std::ofstream::trunc);
+        File << req_body;
+        File.close();
+    }
+    else{ // otherwise, create a new file and insert the id to set
+        entities_->find(entity_)->second.insert(id_);
+        std::ofstream File(file_path);
+        File << req_body;
+        File.close();
+    }
+
+    std::string res_body = "{\"id\": " + std::to_string(id_) + "}";
+    boost::beast::ostream(res.body()) << res_body;
+    res.content_length((res.body().size()));
+    res.set(boost::beast::http::field::content_type, "application/json");
+    http::status s = (id_exists ? http::status::ok : http::status::created);
+    res.result(s);
+    return s;
 }
 
 http::status crud_handler::handle_delete(const http::request<http::dynamic_body> req, http::response<http::dynamic_body>& res) {
-    // TODO: not implemented
     BOOST_LOG_TRIVIAL(debug) << "Handling delete CRUD\n";
+
+    if(entities_->find(entity_) == entities_->end()){
+        return generate_error_response(res, http::status::bad_request, "Invalid entity specified in CRUD delete");
+    }
+    if(entities_->find(entity_)->second.find(id_) == entities_->find(entity_)->second.end()){
+        return generate_error_response(res, http::status::not_found, "Invalid id specified in CRUD delete");
+    }
+
+    // remove file
+    std::string file_path = data_path_ + entity_ + "/" + std::to_string(id_);
+    std::filesystem::remove(file_path);
+
+    // release the id from the set
+    entities_->find(entity_)->second.erase(id_);
+
     return http::status::ok;
 }
 
 http::status crud_handler::handle_list(const http::request<http::dynamic_body> req, http::response<http::dynamic_body>& res) {
-    // TODO: not implemented
     BOOST_LOG_TRIVIAL(debug) << "Handling list CRUD\n";
+   
+    std::string list_of_ids;
+
+    if(entities_->find(entity_) != entities_->end()){
+        // iterate the set of ids
+        for(auto itr : entities_->find(entity_)->second){
+            list_of_ids = list_of_ids + ", " + std::to_string(itr);
+        }
+        list_of_ids = list_of_ids.substr(2);
+    }
+
+    list_of_ids = "[" + list_of_ids + "]";
+    boost::beast::ostream(res.body()) << list_of_ids;
+    res.content_length((res.body().size()));
+    res.set(boost::beast::http::field::content_type, "application/json");
+    res.result(http::status::ok);
     return http::status::ok;
 }
