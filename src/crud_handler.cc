@@ -13,6 +13,7 @@
 
 #include "config_parser.h"
 #include "request_handler.h"
+#include "file_system.h"
 
 namespace http = boost::beast::http;
 using json = nlohmann::json;
@@ -67,11 +68,12 @@ http::status generate_error_response(http::response<http::dynamic_body>& res, ht
     return s;
 }
 
-crud_handler::crud_handler(std::string location, std::string request_url, NginxConfig& config, std::map<std::string, std::set<int>>* entities) {
+crud_handler::crud_handler(std::string location, std::string request_url, NginxConfig& config, std::map<std::string, std::set<int>>* entities, file_system* fs) {
     location_ = location;
     request_url_ = request_url;
     config_ = config;
     entities_= entities;
+    filesystem_ = fs;
 
     entity_ = get_entity(location, request_url);
     if(entity_ == ""){

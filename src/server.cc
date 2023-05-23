@@ -6,10 +6,11 @@
 #include "session.h"
 #include "server.h"
 #include <boost/log/trivial.hpp>
+#include "persistent_filesystem.h"
 
 using boost::asio::ip::tcp;
 
-server::server(boost::asio::io_service& io_service, short port, std::vector<path> paths, NginxConfig& config, std::map<std::string, std::string> handler_names)
+server::server(boost::asio::io_service& io_service, short port, std::vector<path> paths, NginxConfig& config, std::map<std::string, std::string> handler_names, file_system* fs)
 	: io_service_(io_service),
 	acceptor_(io_service, tcp::endpoint(tcp::v4(), port))
 {  
@@ -18,6 +19,7 @@ server::server(boost::asio::io_service& io_service, short port, std::vector<path
 	config_ = config;
 	echo_handler_factory_ = nullptr;
 	static_handler_factory_ = nullptr;	
+	filesystem_ = fs;
 	// build crud_endpoints_
 	for(auto itr : handler_names){
 		if(itr.second == "crud_handler"){
@@ -40,7 +42,7 @@ void server::create_handler_factory(const std::string& name, NginxConfig& config
 	} else if (name == "static_handler") {
 		routes_[endpoint] = new static_handler_factory(endpoint, config);
 	} else if (name == "crud_handler") {
-		routes_[endpoint] = new crud_handler_factory(endpoint, config, crud_endpoints_[endpoint]);
+		routes_[endpoint] = new crud_handler_factory(endpoint, config, crud_endpoints_[endpoint], filesystem_);
 	} else {
 		return ;
 	}

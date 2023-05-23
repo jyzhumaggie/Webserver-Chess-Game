@@ -26,6 +26,7 @@
 #include <map>
 #include "echo_handler_factory.h"
 #include "config_parser.h"
+#include "persistent_filesystem.h"
 
 namespace logging = boost::log;
 namespace src = boost::log::sources;
@@ -68,7 +69,8 @@ int main(int argc, char* argv[])
 	logging::add_common_attributes();
 	std::signal(SIGINT, signal_handler);
 	std::signal(SIGQUIT, signal_handler);
-	
+	persistent_filesystem fs;
+
   	try
   	{
 		if (argc != 2)
@@ -98,7 +100,7 @@ int main(int argc, char* argv[])
 		std::vector<path> paths = config.get_path_from_config();
 
 		std::map<std::string, std::string> handler_names = config.get_handler_types();
-		server s(io_service, port, paths, config, handler_names);
+		server s(io_service, port, paths, config, handler_names, &fs);
 		BOOST_LOG_TRIVIAL(info) << "Accepting connections\n";
 
 		io_service.run();

@@ -9,6 +9,7 @@
 #include "request_handler_factory.h"
 #include "echo_handler_factory.h"
 #include "request_handler_factory.h"
+#include "persistent_filesystem.h"
 
 using boost::asio::ip::tcp;
 
@@ -21,10 +22,11 @@ using boost::asio::ip::tcp;
  * This in turn starts the server.
  */
 
+class persistent_filesystem;
 class server
 {
     public:
-        server(boost::asio::io_service& io_service, short port, std::vector<path> paths, NginxConfig& config, std::map<std::string, std::string> handler_names);
+        server(boost::asio::io_service& io_service, short port, std::vector<path> paths, NginxConfig& config, std::map<std::string, std::string> handler_names, file_system* fs);
         ~server();
         void create_handler_factory(const std::string& name, NginxConfig& config, const std::string& endpoint);
     private:
@@ -41,6 +43,7 @@ class server
         std::map<std::string, std::string> handler_names_;
         std::map<std::string, request_handler_factory*> routes_;
         std::map<std::string, std::map<std::string, std::set<int>>*> crud_endpoints_; // {endpoint, pointer to the map of entities and ids}
+        file_system* filesystem_;
 
         NginxConfig config_;
 };
