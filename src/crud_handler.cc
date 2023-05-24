@@ -173,6 +173,10 @@ http::status crud_handler::handle_create(const http::request<http::dynamic_body>
 
 http::status crud_handler::handle_retrieve(const http::request<http::dynamic_body> req, http::response<http::dynamic_body>& res) {
     BOOST_LOG_TRIVIAL(debug) << "Handling retrieve CRUD\n";
+    if (entities_->find(entity_) == entities_->end()) {
+        BOOST_LOG_TRIVIAL(error) << "Entity " << entity_ << " does not exist\n";
+        return generate_error_response(res, http::status::not_found, "Entity does not exist");
+    }
 
     if(entities_->find(entity_)->second.find(id_) == entities_->find(entity_)->second.end()){
         BOOST_LOG_TRIVIAL(error) << "Invalid id specified in CRUD retrieve\n";
