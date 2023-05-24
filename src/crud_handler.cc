@@ -257,6 +257,9 @@ http::status crud_handler::handle_delete(const http::request<http::dynamic_body>
     // release the id from the set
     entities_->find(entity_)->second.erase(id_);
 
+    boost::beast::ostream(res.body()) << "Deleted " << id_;
+    res.result(http::status::ok);
+    res.prepare_payload();
     return http::status::ok;
 }
 
