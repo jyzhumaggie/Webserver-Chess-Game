@@ -46,6 +46,7 @@ add_library(reply_lib src/echo_handler.cc src/reply.cc)
 add_library(config_parser_lib src/config_parser.cc)
 add_library(crud_handler_lib src/crud_handler.cc)
 add_library(filesystem_lib src/persistent_filesystem.cc)
+add_library(mock_filesystem_lib src/mock_filesystem.cc)
 
 
 add_library(echo_handler_factory_lib src/echo_handler_factory.cc src/echo_handler.cc)
@@ -65,11 +66,13 @@ add_executable(reply_test tests/reply_test.cc)
 add_executable(session_test tests/session_test.cc)
 add_executable(static_handler_test tests/static_handler_test.cc)
 add_executable(echo_handler_test tests/echo_handler_test.cc)
+add_executable(crud_handler_test tests/crud_handler_test.cc)
 target_link_libraries(config_parser_test config_parser_lib Boost::log_setup Boost::log gtest_main gmock_main)
 target_link_libraries(reply_test reply_lib gtest_main gmock_main)
 target_link_libraries(session_test session_lib reply_lib Boost::system Boost::regex Boost::log_setup Boost::log gtest_main gmock_main)
 target_link_libraries(static_handler_test static_handler_lib reply_lib gtest_main gmock_main)
 target_link_libraries(echo_handler_test echo_handler_lib reply_lib Boost::system Boost::regex Boost::log_setup Boost::log gtest_main gmock_main)
+target_link_libraries(crud_handler_test crud_handler_lib mock_filesystem_lib config_parser_lib Boost::system Boost::regex Boost::log_setup Boost::log gtest_main gmock_main)
 
 # Test binary
 # gtest_discover_tests(example_lib_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
@@ -78,6 +81,7 @@ gtest_discover_tests(reply_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/te
 gtest_discover_tests(session_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 gtest_discover_tests(static_handler_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 gtest_discover_tests(echo_handler_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+gtest_discover_tests(crud_handler_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 
 #integration Test
 #commented out untill dispatch fully done
@@ -90,4 +94,4 @@ endif()
 
 #Generating coverage report
 include(cmake/CodeCoverageReportConfig.cmake)
-generate_coverage_report(TARGETS config_parser_lib reply_lib session_lib static_handler_lib echo_handler_lib TESTS static_handler_test config_parser_test reply_test session_test echo_handler_test)
+generate_coverage_report(TARGETS config_parser_lib reply_lib session_lib static_handler_lib echo_handler_lib TESTS static_handler_test config_parser_test reply_test session_test echo_handler_test crud_handler_test)
