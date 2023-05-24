@@ -24,7 +24,7 @@ RESULT=$?
 
 TEST_1_RESULT=0
 
-if [ $? -eq 0 ];
+if [ $RESULT -eq 0 ];
 then
    TEST_1_RESULT=1
    echo "Test 1 Success"
