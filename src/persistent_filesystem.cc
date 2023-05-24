@@ -44,13 +44,20 @@ bool persistent_filesystem::delete_file(const std::string& path) {
 	return false;
 }
 
-bool persistent_filesystem::list_files(const std::string& path, std::vector<std::string>& files) {
+bool persistent_filesystem::list_files(const std::string& path, std::map<std::string, std::set<int>>& files) {
 	if (!std::filesystem::is_directory(path)) {
 		BOOST_LOG_TRIVIAL(error) << path << " is not a directory" << std::endl;
 		return false;
 	}
+	std::string filename;
+	std::string entity;
 	for (const auto & entry : std::filesystem::directory_iterator(path)){
-        files.push_back(entry.path().filename().string());
+		filename = entry.path().filename().string();
+		entity = std::string(filename.begin() + filename.find_last_of('/') + 1, filename.end());
+        files.insert({entity, std::set<int>{}});
+        for (const auto & stored : std::filesystem::directory_iterator(path + "/" + filename)) {
+            files[entity].insert(std::stoi(stored.path().filename().string()));
+        }
 	}
 	return true;
 }

@@ -21,10 +21,11 @@ server::server(boost::asio::io_service& io_service, short port, std::vector<path
 	static_handler_factory_ = nullptr;	
 	filesystem_ = fs;
 	// build crud_endpoints_
-	for(auto itr : handler_names){
-		if(itr.second == "crud_handler"){
+	for(auto itr : paths){
+		if(handler_names[itr.endpoint] == "crud_handler"){
 			std::map<std::string, std::set<int>>* ptr = new std::map<std::string, std::set<int>>;
-			crud_endpoints_.insert({itr.first, ptr});
+			filesystem_->list_files(itr.root, *ptr);
+			crud_endpoints_[itr.endpoint] = ptr;
 		}
 	}
 	start_accept();
