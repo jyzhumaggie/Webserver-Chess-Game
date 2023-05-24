@@ -140,7 +140,7 @@ http::status crud_handler::handle_create(const http::request<http::dynamic_body>
     // create a new entity if needed
     if(entities_->find(entity_) == entities_->end()){
         entities_->insert({entity_, std::set<int>{}});
-        std::filesystem::create_directory(data_path_ + entity_);
+        filesystem_->create_directory(data_path_ + entity_);
     }
     
     // determine id and insert into the set
@@ -160,12 +160,7 @@ http::status crud_handler::handle_create(const http::request<http::dynamic_body>
         return generate_error_response(res, http::status::bad_request, "Id specified in CRUD create");
     }
     entities_->find(entity_)->second.insert(id_);
-        
-    // write data to file
-    std::string file_path = data_path_ + entity_ + "/" + std::to_string(id_);
-    std::ofstream File(file_path);
-    File << req_body;
-    File.close();
+    filesystem_->write_file(data_path_ + entity_ + "/" + std::to_string(id_), j);
 
     // create JSON response
     std::string res_body = "{\"id\": " + std::to_string(id_) + "}";
@@ -187,15 +182,8 @@ http::status crud_handler::handle_retrieve(const http::request<http::dynamic_bod
     std::string file_path = data_path_ + entity_ + "/" + std::to_string(id_);
 
     // read data from file
-    std::ifstream File(file_path);
-    std::string data;
-    char ch;
-    while(true){
-        File.get(ch);
-        if( File.eof() ) break;
-        data += ch;
-    }
-    File.close();
+    nlohmann::json data;
+    filesystem_->read_file(file_path, data);
 
     // create response
     boost::beast::ostream(res.body()) << data;
@@ -233,16 +221,11 @@ http::status crud_handler::handle_update(const http::request<http::dynamic_body>
     bool id_exists = false;
     if(entities_->find(entity_)->second.find(id_) != entities_->find(entity_)->second.end()){
         id_exists = true;
-        std::ofstream File(file_path, std::ofstream::trunc);
-        File << req_body;
-        File.close();
     }
     else{ // otherwise, create a new file and insert the id to set
         entities_->find(entity_)->second.insert(id_);
-        std::ofstream File(file_path);
-        File << req_body;
-        File.close();
     }
+    filesystem_->write_file(file_path, j);
 
     std::string res_body = "{\"id\": " + std::to_string(id_) + "}";
     boost::beast::ostream(res.body()) << res_body;
@@ -265,7 +248,7 @@ http::status crud_handler::handle_delete(const http::request<http::dynamic_body>
 
     // remove file
     std::string file_path = data_path_ + entity_ + "/" + std::to_string(id_);
-    std::filesystem::remove(file_path);
+    filesystem_->delete_file(file_path);
 
     // release the id from the set
     entities_->find(entity_)->second.erase(id_);

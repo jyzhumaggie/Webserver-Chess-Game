@@ -36,7 +36,8 @@ bool persistent_filesystem::read_file(const std::string& path, nlohmann::json& d
 }
 
 bool persistent_filesystem::delete_file(const std::string& path) {
-	if (!std::filesystem::remove(path)){
+	if (std::filesystem::remove(path)){
+		BOOST_LOG_TRIVIAL(info) << "Deleted file " << path << std::endl;
 		return true;
 	}
 	BOOST_LOG_TRIVIAL(error) << "Could not delete file " << path << std::endl;
