@@ -21,4 +21,6 @@ server {
     }
     location /sleep/ sleep_handler {
     }
+    location /health/ health_handler {
+    }
 }

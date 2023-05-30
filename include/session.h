@@ -14,6 +14,7 @@
 #include "reply.h"
 #include "config_parser.h"
 #include "request_handler_factory.h"
+#include "health_handler_factory.h"
 #include "echo_handler_factory.h"
 #include "error_handler.h"
 

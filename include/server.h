@@ -9,6 +9,7 @@
 #include "static_handler_factory.h"
 #include "request_handler_factory.h"
 #include "echo_handler_factory.h"
+#include "health_handler_factory.h"
 #include "request_handler_factory.h"
 #include "sleep_handler_factory.h"
 #include "persistent_filesystem.h"

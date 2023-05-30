@@ -38,12 +38,13 @@ include_directories(include)
 find_program (BASH_PROGRAM bash)
 
 add_library(server_lib src/server.cc)
-add_library(session_lib src/session.cc src/echo_handler.cc src/static_handler.cc src/not_found_handler.cc src/error_handler.cc src/sleep_handler.cc)
+add_library(session_lib src/session.cc src/echo_handler.cc src/static_handler.cc src/not_found_handler.cc src/error_handler.cc src/sleep_handler.cc src/health_handler.cc)
 add_library(echo_handler_lib src/echo_handler.cc)
 add_library(not_found_handler_lib src/not_found_handler.cc)
 add_library(error_handler_lib src/error_handler.cc)
 add_library(sleep_handler_lib src/sleep_handler.cc)
 add_library(static_handler_lib src/static_handler.cc)
+add_library(health_handler_lib src/health_handler.cc)
 add_library(reply_lib src/echo_handler.cc src/reply.cc)
 add_library(config_parser_lib src/config_parser.cc)
 add_library(crud_handler_lib src/crud_handler.cc)
@@ -55,12 +56,12 @@ add_library(echo_handler_factory_lib src/echo_handler_factory.cc src/echo_handle
 add_library(static_handler_factory_lib src/static_handler_factory.cc src/static_handler.cc)
 add_library(crud_handler_factory_lib src/crud_handler_factory.cc src/crud_handler.cc)
 add_library(sleep_handler_factory_lib src/sleep_handler_factory.cc src/sleep_handler.cc)
-
+add_library(health_handler_factory_lib src/health_handler_factory.cc src/health_handler.cc)
 
 
 # Executable name, srcs, and deps
 add_executable(webserver src/server_main.cc)
-target_link_libraries(webserver server_lib session_lib not_found_handler_lib error_handler_lib echo_handler_lib sleep_handler_lib static_handler_lib crud_handler_lib reply_lib config_parser_lib echo_handler_factory_lib static_handler_factory_lib crud_handler_factory_lib sleep_handler_factory_lib filesystem_lib Boost::log_setup Boost::log Boost::system Boost::regex pthread)
+target_link_libraries(webserver server_lib session_lib not_found_handler_lib error_handler_lib echo_handler_lib sleep_handler_lib health_handler_lib static_handler_lib crud_handler_lib reply_lib config_parser_lib echo_handler_factory_lib static_handler_factory_lib health_handler_factory_lib crud_handler_factory_lib sleep_handler_factory_lib filesystem_lib Boost::log_setup Boost::log Boost::system Boost::regex pthread)
 
 
 # Test executable name, srcs, and deps
