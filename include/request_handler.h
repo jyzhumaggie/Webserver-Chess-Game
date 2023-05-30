@@ -5,7 +5,6 @@
 #include <boost/beast/http.hpp>
 #include <boost/log/trivial.hpp>
 
-
 namespace beast = boost::beast;
 
 class request_handler {

@@ -3,4 +3,7 @@
 build
 build_*
 mirror
-files/crud*/*
+files/crud1/*
+files/crud2/*
+!files/crud1/.gitkeep
+!files/crud2/.gitkeep

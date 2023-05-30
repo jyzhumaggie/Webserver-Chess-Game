@@ -44,6 +44,8 @@ void server::create_handler_factory(const std::string& name, NginxConfig& config
 		routes_[endpoint] = new static_handler_factory(endpoint, config);
 	} else if (name == "crud_handler") {
 		routes_[endpoint] = new crud_handler_factory(endpoint, config, crud_endpoints_[endpoint], filesystem_);
+	} else if (name == "sleep_handler"){
+		routes_[endpoint] = new sleep_handler_factory(endpoint, config);
 	} else {
 		return ;
 	}
@@ -71,6 +73,19 @@ void server::start_accept()
 	acceptor_.async_accept(new_session->socket(),
 		boost::bind(&server::handle_accept, this, new_session,
 		boost::asio::placeholders::error));
+}
+
+void server::generate_threads() {
+
+	BOOST_LOG_TRIVIAL(info) << "Generating " << NUM_THREADS << " threads\n";
+	// Launch the pool with four threads.
+	boost::asio::thread_pool t_pool(NUM_THREADS);
+
+	for (int i = 0; i < NUM_THREADS; i++) {
+		// Submit io_service.run function to the pool.
+		boost::asio::post(t_pool, boost::bind(&boost::asio::io_service::run, &io_service_));
+	}
+	t_pool.join();
 }
 
 void server::handle_accept(session* new_session, const boost::system::error_code& error)

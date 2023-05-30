@@ -71,6 +71,7 @@ std::map<std::string, std::string> NginxConfig::get_handler_types() {
 				if (child->tokens_[0] == "location" &&
 					child->tokens_.size() >= 3 &&
 					child->child_block_.get() != nullptr) {
+					BOOST_LOG_TRIVIAL(info) << "Getting static path: " << child->tokens_[1];
 					handler_factory_types_[child->tokens_[1]] = child->tokens_[2];
 				}
 			}

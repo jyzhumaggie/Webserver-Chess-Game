@@ -11,6 +11,7 @@
 #include "echo_handler.h"
 #include "static_handler.h"
 #include "not_found_handler.h"
+#include "error_handler.h"
 
 #include <string>
 

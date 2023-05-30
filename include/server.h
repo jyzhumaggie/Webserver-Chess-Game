@@ -3,12 +3,14 @@
 
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
+#include <boost/asio/thread_pool.hpp>
 #include "config_parser.h"
 #include "echo_handler_factory.h"
 #include "static_handler_factory.h"
 #include "request_handler_factory.h"
 #include "echo_handler_factory.h"
 #include "request_handler_factory.h"
+#include "sleep_handler_factory.h"
 #include "persistent_filesystem.h"
 
 using boost::asio::ip::tcp;
@@ -22,6 +24,8 @@ using boost::asio::ip::tcp;
  * This in turn starts the server.
  */
 
+static const int NUM_THREADS = 8;
+
 class persistent_filesystem;
 class server
 {
@@ -29,9 +33,9 @@ class server
         server(boost::asio::io_service& io_service, short port, std::vector<path> paths, NginxConfig& config, std::map<std::string, std::string> handler_names, file_system* fs);
         ~server();
         void create_handler_factory(const std::string& name, NginxConfig& config, const std::string& endpoint);
+        void generate_threads();
     private:
         void start_accept();
-
         void handle_accept(session* new_session,
             const boost::system::error_code& error);
 

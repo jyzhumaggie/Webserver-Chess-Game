@@ -102,8 +102,7 @@ int main(int argc, char* argv[])
 		std::map<std::string, std::string> handler_names = config.get_handler_types();
 		server s(io_service, port, paths, config, handler_names, &fs);
 		BOOST_LOG_TRIVIAL(info) << "Accepting connections\n";
-
-		io_service.run();
+		s.generate_threads();
 	}
 	catch (std::exception& e)
 	{

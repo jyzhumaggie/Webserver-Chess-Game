@@ -15,6 +15,7 @@
 #include "config_parser.h"
 #include "request_handler_factory.h"
 #include "echo_handler_factory.h"
+#include "error_handler.h"
 
 using boost::asio::ip::tcp;
 using http::server::reply;
