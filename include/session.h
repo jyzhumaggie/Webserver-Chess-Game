@@ -50,6 +50,7 @@ public:
 
     std::string match(std::map<std::string, request_handler_factory*> routes, std::string& url);
     bool set_routes(std::map<std::string, request_handler_factory*> routes);
+    bool set_handler_names(std::map<std::string, std::string> handler_names);
     
 private:
     tcp::socket socket_;
@@ -58,6 +59,7 @@ private:
     enum { max_length = 1024 };
     NginxConfig config_;
     std::map<std::string, request_handler_factory*> routes_;
+    std::map<std::string, std::string> handler_names_;
 };
 
 #endif

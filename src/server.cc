@@ -72,6 +72,7 @@ void server::start_accept()
 		++it;
 	}
 	new_session->set_routes(routes_);
+    new_session->set_handler_names(handler_names_);
 	acceptor_.async_accept(new_session->socket(),
 		boost::bind(&server::handle_accept, this, new_session,
 		boost::asio::placeholders::error));
