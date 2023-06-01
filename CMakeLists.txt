@@ -72,6 +72,7 @@ add_executable(static_handler_test tests/static_handler_test.cc)
 add_executable(echo_handler_test tests/echo_handler_test.cc)
 add_executable(crud_handler_test tests/crud_handler_test.cc)
 add_executable(sleep_handler_test tests/sleep_handler_test.cc)
+add_executable(health_handler_test tests/health_handler_test.cc)
 add_executable(not_found_handler_test tests/not_found_handler_test.cc)
 add_executable(error_handler_test tests/error_handler_test.cc)
 
@@ -83,6 +84,7 @@ target_link_libraries(static_handler_test static_handler_lib reply_lib gtest_mai
 target_link_libraries(echo_handler_test echo_handler_lib reply_lib Boost::system Boost::regex Boost::log_setup Boost::log gtest_main gmock_main)
 target_link_libraries(crud_handler_test crud_handler_lib mock_filesystem_lib config_parser_lib Boost::system Boost::regex Boost::log_setup Boost::log gtest_main gmock_main)
 target_link_libraries(sleep_handler_test sleep_handler_lib Boost::system Boost::regex Boost::log_setup Boost::log gtest_main gmock_main)
+target_link_libraries(health_handler_test health_handler_lib Boost::system Boost::regex Boost::log_setup Boost::log gtest_main gmock_main)
 target_link_libraries(not_found_handler_test not_found_handler_lib Boost::system Boost::regex Boost::log_setup Boost::log gtest_main gmock_main)
 target_link_libraries(error_handler_test error_handler_lib Boost::system Boost::regex Boost::log_setup Boost::log gtest_main gmock_main)
 
@@ -95,6 +97,7 @@ gtest_discover_tests(static_handler_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURC
 gtest_discover_tests(echo_handler_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 gtest_discover_tests(crud_handler_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 gtest_discover_tests(sleep_handler_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+gtest_discover_tests(health_handler_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 gtest_discover_tests(not_found_handler_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 gtest_discover_tests(error_handler_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 
@@ -108,4 +111,4 @@ endif()
 
 #Generating coverage report
 include(cmake/CodeCoverageReportConfig.cmake)
-generate_coverage_report(TARGETS config_parser_lib reply_lib session_lib static_handler_lib echo_handler_lib sleep_handler_lib not_found_handler_lib error_handler_lib TESTS static_handler_test config_parser_test reply_test session_test echo_handler_test crud_handler_test sleep_handler_test not_found_handler_test error_handler_test)
+generate_coverage_report(TARGETS config_parser_lib reply_lib session_lib static_handler_lib echo_handler_lib sleep_handler_lib health_handler_lib not_found_handler_lib error_handler_lib TESTS static_handler_test config_parser_test reply_test session_test echo_handler_test crud_handler_test sleep_handler_test health_handler_test not_found_handler_test error_handler_test)
