@@ -10,97 +10,37 @@ using namespace http::server;
 
 class StaticHandlerTestFixture : public ::testing::Test {
  protected:
+    NginxConfig config_;
+    std::vector<path> paths;
+    std::string location_;
+    std::string request_url_;
 };
 
 //TODO FIX AFTER IMPLEMNENTATION CHANGED
 
-// TEST_F(FileHandlerTestFixture, EmptyRequest) {
-//   std::vector<path> paths;
-//   file_handler handler("../files/static/", paths);
-// 	EXPECT_EQ(handler.parse(""),errorHandler);
-// }
+TEST_F(StaticHandlerTestFixture, GetReply200) {
+  
+    static_handler handler("/static1", "../files/static/", config_);
+    std::string return_string = handler.get_reply(200);
+    EXPECT_EQ(return_string, "");
+}
 
+TEST_F(StaticHandlerTestFixture, GetReply400) {
+    static_handler handler("/static1", "../files/static/", config_);
+    std::string expected_output = "<html>"
+                                "<head><title>Bad Request</title></head>"
+                                "<body><h1>400 Bad Request</h1></body>"
+                                "</html>";
+    std::string return_string = handler.get_reply(400);
+    EXPECT_EQ(return_string, expected_output);
+}
 
-// TEST_F(FileHandlerTestFixture, BadRequestIncorrectSize) {
-// 	std::vector<path> paths;
-//   file_handler handler("../files/static/", paths);
-//   EXPECT_EQ(handler.parse("GET\n\n"),errorHandler); 
-// }
-
-// TEST_F(FileHandlerTestFixture, BadRequestIncorrectMethod) {
-// 	std::vector<path> paths;
-//   file_handler handler("../files/static/", paths);
-//   EXPECT_EQ(handler.parse("POST hello.txt HTTP/1.1\n\n"),errorHandler); 
-// }
-
-// TEST_F(FileHandlerTestFixture, BadRequestIncorrectHTTP) {
-//   std::vector<path> paths;
-//   file_handler handler("../files/static/", paths);
-//   EXPECT_EQ(handler.parse("GET hello.txt HTTP/1.0\n\n"),errorHandler); 
-// }
-
-// TEST_F(FileHandlerTestFixture, BadRequestNoFileName) {
-// 	std::vector<path> paths;
-//   file_handler handler("../files/static/", paths);
-//   EXPECT_EQ(handler.parse("GET static1/ HTTP/1.1\n\n"),errorHandler); 
-// }
-
-
-// TEST_F(FileHandlerTestFixture, GoodRequestSingleLine) {
-//   std::vector<path> paths;
-// 	file_handler handler("",paths);
-//   EXPECT_EQ(handler.parse("GET /static1/hello.txt HTTP/1.1\n\n"),staticHandler); 
-// }
-
-// TEST_F(FileHandlerTestFixture, GoodRequestMultiline) {
-//   std::vector<path> paths;
-// 	file_handler handler("",paths);
-//   EXPECT_EQ(handler.parse("GET /static1/hello.txt HTTP/1.1\nHost: localhost8080\n\n"),staticHandler); 
-// }
-
-// TEST_F(FileHandlerTestFixture, BadRequestMultiline) {
-//   std::vector<path> paths;
-//   file_handler handler("../files/static/", paths);
-//   EXPECT_EQ(handler.parse("GET /static1/hello.txt HTTP/1.1\nHost: localhost:8080\n\n"),errorHandler); 
-// }
-
-// TEST_F(FileHandlerTestFixture, BrokenPipeException) {
-//   bool except_found = false;
-//   try {
-//     std::vector<path> paths;
-//     file_handler fh("../files/static/",paths);
-//     fh.parse("GET test_file.txt HTTP/1.1");
-//     unsigned short port_num = 3333;
-//     boost::asio::ip::tcp::endpoint ep(boost::asio::ip::address_v4::any(), port_num);
-//     boost::asio::io_service ios;
-//     boost::asio::ip::tcp::socket sock(ios, ep.protocol());
-//     boost::system::error_code ec;
-//     sock.bind(ep, ec);
-//     fh.handle_request(sock);
-//   }
-//   catch (...){
-//     except_found = true;
-//   }
-//   EXPECT_TRUE(except_found);
-// }
-
-// TEST_F(FileHandlerTestFixture, BadFileDescriptorException) {
-//   bool except_found = false;
-//   try {
-//     std::vector<path> paths;
-//     file_handler fh("",paths);
-//     fh.parse("");
-//     unsigned short port_num = 3333;
-//     boost::asio::ip::tcp::endpoint ep(boost::asio::ip::address_v4::any(), port_num);
-//     boost::asio::io_service ios;
-//     boost::asio::ip::tcp::socket sock(ios, ep.protocol());
-//     boost::system::error_code ec;
-//     sock.bind(ep, ec);
-//     fh.handle_request(sock);
-//     sock.close();
-//   }
-//   catch (...){
-//     except_found = true;
-//   }
-//   EXPECT_TRUE(except_found);
-// }
+TEST_F(StaticHandlerTestFixture, GetReplyOthers) {
+    static_handler handler("/static1", "../files/static/", config_);
+    std::string expected_output = "<html>"
+                                "<head><title>Not Found</title></head>"
+                                "<body><h1>404 Not Found</h1></body>"
+                                "</html>";
+    std::string return_string = handler.get_reply(0);
+    EXPECT_EQ(return_string, expected_output);
+}
