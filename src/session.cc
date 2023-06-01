@@ -85,14 +85,14 @@ string session::match(map<std::string, request_handler_factory*> routes, string&
 	return current_result;
 }
 
-bool session::handle_read(const boost::system::error_code& error,
+void session::handle_read(const boost::system::error_code& error,
 		size_t bytes_transferred)
 {
+    string loc = std::string(request_.target());
+	std::string location = match(routes_, loc);
+
 	if (!error)
 	{
-		string loc = std::string(request_.target());
-		std::string location = match(routes_, loc);
-
 		boost::beast::http::response <boost::beast::http::dynamic_body> response;
 		if (routes_.find(location) == routes_.end()) {
 			// 404 handler
@@ -102,8 +102,6 @@ bool session::handle_read(const boost::system::error_code& error,
             // machine-parsable log by regex statement: (\[ResponseMetrics\]: (\d+),([^,]+),([^,]+),([^,]+))
             // group 1: response code, group 2: request path, group 3: request IP, group 4: matched request handler name
             BOOST_LOG_TRIVIAL(info) << "[ResponseMetrics]: "<<std::to_string(response.result_int())<<","<<request_.target()<<","<<clientIP_<<","<<"not_found_handler";
-			
-            boost::beast::http::write(socket_, response);
 		} else {
 			request_handler_factory* factory = routes_[location];
 			request_handler* handler = factory->create(location, loc);
@@ -111,39 +109,25 @@ bool session::handle_read(const boost::system::error_code& error,
         
             // machine-parsable log by regex statement: (\[ResponseMetrics\]: (\d+),([^,]+),([^,]+),([^,]+))
             // group 1: response code, group 2: request path, group 3: request IP, group 4: matched request handler name
-            BOOST_LOG_TRIVIAL(info) << "[ResponseMetrics]: "<<std::to_string(response.result_int())<<","<<request_.target()<<","<<clientIP_<<","<<handler_names_[location];
-			
-            boost::beast::http::write(socket_, response);
+            BOOST_LOG_TRIVIAL(info) << "[ResponseMetrics]: "<<std::to_string(response.result_int())<<","<<request_.target()<<","<<clientIP_<<","<<handler_names_[location];	
 		}
 
+        
+        boost::beast::http::write(socket_, response);
 
-		handle_write(error);
-        return true;
+        delete this;
 	}
 	else
-	{
-        return false;
-	}
-}
+	{   
+        boost::beast::http::response <boost::beast::http::dynamic_body> response;
+        request_handler* handler = new error_handler(location, loc);
+		handler->serve(request_, response);
 
+        // machine-parsable log by regex statement: (\[ResponseMetrics\]: (\d+),([^,]+),([^,]+),([^,]+))
+        // group 1: response code, group 2: request path, group 3: request IP, group 4: matched request handler name
+        BOOST_LOG_TRIVIAL(info) << "[ResponseMetrics]: "<<std::to_string(response.result_int())<<","<<request_.target()<<","<<clientIP_<<","<<"error_handler";
 
-bool session::handle_write(const boost::system::error_code& error)
-{
-	if (!error)
-	{
-		boost::beast::http::async_read(socket_,
-		buffer_,
-		request_,
-		boost::bind(&session::handle_read, this,
-				boost::asio::placeholders::error,
-				boost::asio::placeholders::bytes_transferred)
-		);
-        BOOST_LOG_TRIVIAL(info) << "Client " << clientIP_ << " handle write complete";
-        return true;
-	}
-	else
-	{
-        BOOST_LOG_TRIVIAL(info) << "Client " << clientIP_ << " handle write incomplete";
-        return false;
+        boost::beast::http::write(socket_,response);
+        delete this;
 	}
 }

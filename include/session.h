@@ -41,9 +41,7 @@ public:
     bool start(std::vector<path> paths);
 
     bool is_request_complete(const boost::beast::error_code& ec, std::size_t bytes_transferred);
-    bool handle_read(const boost::system::error_code& error, size_t bytes_transferred);
-
-    bool handle_write(const boost::system::error_code& error);
+    void handle_read(const boost::system::error_code& error, size_t bytes_transferred);
 
     boost::beast::http::request<boost::beast::http::dynamic_body> request_;
     boost::asio::streambuf buffer_;
