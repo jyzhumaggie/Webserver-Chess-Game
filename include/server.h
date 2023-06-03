@@ -12,6 +12,7 @@
 #include "health_handler_factory.h"
 #include "request_handler_factory.h"
 #include "sleep_handler_factory.h"
+#include "chess_handler_factory.h"
 #include "persistent_filesystem.h"
 
 using boost::asio::ip::tcp;

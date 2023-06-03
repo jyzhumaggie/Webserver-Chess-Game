@@ -48,6 +48,8 @@ void server::create_handler_factory(const std::string& name, NginxConfig& config
 		routes_[endpoint] = new sleep_handler_factory(endpoint, config);
 	} else if (name == "health_handler"){
 		routes_[endpoint] = new health_handler_factory(endpoint, config);
+	} else if (name == "chess_handler"){
+		routes_[endpoint] = new chess_handler_factory(endpoint, config);
 	} else {
 		return ;
 	}

@@ -23,4 +23,6 @@ server {
     }
     location /health/ health_handler {
     }
+    location /chess/ chess_handler {
+    }
 }

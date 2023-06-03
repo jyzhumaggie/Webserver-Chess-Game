@@ -14,7 +14,7 @@ Board::Board()
     ClearBoard();
 }
 
-void Board::parseFen(std::string fen)
+bool Board::parseFen(std::string fen)
 {
     ClearBoard();       //clears board
     
@@ -96,9 +96,7 @@ void Board::parseFen(std::string fen)
                     c += (int)fen[i] - (int)'0';
                     break;
                 default:
-                    std::cerr << "Invalid FEN" << std::endl;
-                    exit(1);
-                    break;
+                    return false;
             }
         }
         //side to move
@@ -145,9 +143,7 @@ void Board::parseFen(std::string fen)
                     castlePerm |= BQCA;
                     break;
                 default:
-                    std::cerr << "Invalid FEN" << std::endl;
-                    exit(1);
-                    break;
+                    return false;
             }
         }
         //en pas square
@@ -164,6 +160,7 @@ void Board::parseFen(std::string fen)
             section++;
         }
     }
+    return true;
 }
 
 void Board::addPiece(int r, int c, int pce)

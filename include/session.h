@@ -16,6 +16,7 @@
 #include "request_handler_factory.h"
 #include "health_handler_factory.h"
 #include "echo_handler_factory.h"
+#include "chess_handler_factory.h"
 #include "error_handler.h"
 
 using boost::asio::ip::tcp;
