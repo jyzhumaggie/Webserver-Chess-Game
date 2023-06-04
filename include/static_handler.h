@@ -8,7 +8,6 @@
 #include <boost/asio.hpp>
 #include <iostream>
 #include <unordered_map>
-#include "config_parser.h"
 
 #include <boost/beast/core.hpp>
 #include <boost/beast/http.hpp>

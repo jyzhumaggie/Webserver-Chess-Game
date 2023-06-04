@@ -29,13 +29,14 @@ using namespace std;
 
 class chess_handler : public request_handler {
     public:
-        chess_handler(string location, string request_url);
+        chess_handler(string location, string request_url, NginxConfig& config_);
         beast::http::status serve(const beast::http::request<beast::http::dynamic_body> req, beast::http::response<beast::http::dynamic_body>& res);
     private:
         std::string get_fen(std::string location, std::string request_url);
         beast::http::status generate_error_response(beast::http::response<beast::http::dynamic_body>& res, beast::http::status s, std::string msg);
         std::string location_;
         std::string request_url_;
+        NginxConfig config_;
 };
 
 #endif

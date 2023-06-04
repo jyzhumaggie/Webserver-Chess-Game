@@ -7,5 +7,5 @@ chess_handler_factory::chess_handler_factory(const std::string& path, NginxConfi
 
 request_handler* chess_handler_factory::create(const std::string& location, const std::string& url)
 {
-    return new chess_handler(location_, url);
+    return new chess_handler(location_, url, config_);
 }

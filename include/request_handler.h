@@ -4,6 +4,7 @@
 #include <boost/beast/core.hpp>
 #include <boost/beast/http.hpp>
 #include <boost/log/trivial.hpp>
+#include "config_parser.h"
 
 namespace beast = boost::beast;
 
