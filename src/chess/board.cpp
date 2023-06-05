@@ -163,6 +163,82 @@ bool Board::parseFen(std::string fen)
     return true;
 }
 
+std::string Board::getFen() {
+    std::string fen = "";
+
+    //Extract piece portion of FEN
+    for (int r = 0; r < 8; r++) {
+        int numSpaces = 0;
+        //For each column, either list the piece or keep track of number of spaces
+        for (int c = 0; c < 8; c++) {
+            int pce = mBoard[r][c];
+            if (pce != NOPIECE) {
+                //Print out spaces when putting in a piece
+                if (numSpaces != 0) {
+                    fen += (char)((int)'0' + numSpaces);
+                    numSpaces = 0;
+                }
+                fen += PceChar[pce];
+            }
+            else {
+                numSpaces++;
+            }
+        }
+        //There may be excess spaces at the end
+        if (numSpaces != 0) {
+            fen += (char)((int)'0' + numSpaces);
+            numSpaces = 0;
+        }
+        //All columns are separated by a slash
+        if (r != 7) {
+            fen += "/";
+        }
+    }
+
+    //Extract game state info
+    //Side to move
+    if (side == WHITE) {
+        fen += " w ";
+    }
+    else if (side == BLACK) {
+        fen += " b ";
+    }
+    else {
+        //Error
+        return "";
+    }
+
+    //Castle permissions
+    if (castlePerm & WKCA) {
+        fen += "K";
+    }
+    if (castlePerm & WQCA) {
+        fen += "Q";
+    }
+    if (castlePerm & BKCA) {
+        fen += "k";
+    }
+    if (castlePerm & BQCA) {
+        fen += "q";
+    }
+    fen += " ";
+
+    if (enpasSquareR != OFFBOARD) {
+        fen += (char)((int)'a' + enpasSquareC);
+        //Enpas row is always 6 or 3 depending on side
+        if (side == WHITE) {
+            fen += "6";
+        }
+        else {
+            fen += "3";
+        }
+    }
+    else {
+        fen += "-";
+    }
+    return fen;
+}
+
 void Board::addPiece(int r, int c, int pce)
 {
     //XORing out the piece at (r, c)

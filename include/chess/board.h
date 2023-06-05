@@ -19,6 +19,7 @@ public:
     
     //Modifies board material information
     bool parseFen(std::string fen);           //updates board according to fen, assumes returns true if passed a valid fen, false otherwise
+    std::string getFen();                     //returns the fen for the given position
     void addPiece(int r, int c, int pce);     //adds a piece to the board, and updates the position key, assumes an empty spot, assumes pce is valid
     void removePiece(int r, int c);           //removes a piece from the board, updates the position key, assumes there is a piece in that square
     void pushHistory(int move);   //updates history with new move
