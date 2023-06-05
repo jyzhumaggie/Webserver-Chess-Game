@@ -1,25 +1,158 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+<head>
+	<meta charset="utf-8"> 
+    <title>Chessboard</title>
+    <style>
+        .chessboard {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            grid-template-rows: repeat(8, 1fr);
+            width: 400px;
+            height: 400px;
+        }
+
+        .chessboard div {
+            border: 1px solid black;
+            cursor: pointer;
+        }
+
+		.checker-dark {
+			background-color: rgba(34, 49, 4, 0.901);
+		}
+		.checker-light {
+			background-color: rgba(89, 99, 69, 0.861);
+		}
+
+        .piece {
+            font-size: 40px;
+            text-align: center;
+            line-height: 1;
+        }
+
+        .highlight {
+            background-color: rgba(0, 0, 0, 0.5) !important;
+        }
+    </style>
+</head>
+
+
 <body>
+	<!-- Start New Game button -->
+	<button type="button" id="myButton">Start New Game</button>
+	<!-- Chessboard Display -->
+    <div class="chessboard"></div>
 
+	<script>
+		var btn = document.getElementById('myButton');
 
-<button type="button" onclick="loadDoc()">Start New Game</button>
+		btn.addEventListener('click', function() {
+			fetch('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR')
+				.then(response => response.text())
+				.then(data => {
+					console.log(data);
+					// TODO: Initialize board using response data (FEN)
+					const chessboard = document.querySelector('.chessboard');
+					var pieces = ['♜', '♞', '♝', '♛', '♚', '♝', '♞', '♜',
+									'♟', '♟', '♟', '♟', '♟', '♟', '♟', '♟',
+									'', '', '', '', '', '', '', '',
+									'', '', '', '', '', '', '', '',
+									'', '', '', '', '', '', '', '',
+									'', '', '', '', '', '', '', '',
+									'♙', '♙', '♙', '♙', '♙', '♙', '♙', '♙',
+									'♖', '♘', '♗', '♕', '♔', '♗', '♘', '♖'];
+					var checker = true;
+					while (chessboard.firstChild) {
+						chessboard.firstChild.remove();
+						console.log(`Starting new game, cleared Chessboard`);
+					}
+					for (let row = 0; row < 8; row++) {
+						for (let col = 0; col < 8; col++) {
+							const square = document.createElement('div');
+							if (col == 0) {
+								checker = !checker;
+							}
+							if (checker) {
+								square.classList.add('checker-dark');
+							} else {
+								square.classList.add('checker-light');
+							}
+							square.classList.add('piece');
+							square.innerHTML = pieces[row * 8 + col];
+							chessboard.appendChild(square);
+							square.addEventListener('click', handlePieceClick);
+							checker = !checker;
+						}
+					}
 
-<p id="demo"></p>
+					var completeMove = [];
+					function handlePieceClick() {
+						// Clear previous highlights
+						const squares = document.querySelectorAll('.chessboard div');
+						squares.forEach(square => square.classList.remove('highlight'));
 
+						// Highlight clicked piece's square
+						this.classList.add('highlight');
 
-<script>
-function loadDoc() {
-  var xhttp = new XMLHttpRequest();
-  xhttp.onreadystatechange = function() {
-    if (this.readyState == 4 && this.status == 200) {
-      document.getElementById("demo").innerHTML = this.responseText;
-    }
-  };
-  xhttp.open("GET", "/echo/Placeholder_chess_board", true);
-  xhttp.send();
-}
-</script>
+						// Get the position of the clicked piece
+						const rowIndex = Math.floor(Array.from(chessboard.children).indexOf(this) / 8);
+						const colIndex = Array.from(chessboard.children).indexOf(this) % 8;
 
+						// Display the position in the console
+						console.log(`Clicked piece: row ${rowIndex}, column ${colIndex}`);
+						
+						// Composing a move
+						completeMove.push(rowIndex, colIndex);
+						if (completeMove.length == 4) {
+							console.log("Complete move registered!");
+
+							// TODO: call API to vetMove (check if legal, then make move/report bad move), return new FEN
+
+							// Placeholder before getting new FEN to signal chessboard change on completed move selection:
+							pieces = ['', '♞', '♝', '♛', '♚', '♝', '♞', '♜',
+									'♟', '♟', '♟', '♟', '♟', '♟', '♟', '♟',
+									'', '', '', '', '', '', '', '',
+									'♜', '', '', '', '', '', '', '',
+									'', '', '', '', '', '', '', '',
+									'', '', '', '', '', '', '', '',
+									'♙', '♙', '♙', '♙', '♙', '♙', '♙', '♙',
+									'♖', '♘', '♗', '♕', '♔', '♗', '♘', '♖'];
+
+							while (chessboard.firstChild) {
+								chessboard.firstChild.remove();
+								console.log(`Cleared Chessboard`);
+							}
+
+							for (let row = 0; row < 8; row++) {
+								for (let col = 0; col < 8; col++) {
+									const square = document.createElement('div');
+									if (col == 0) {
+										checker = !checker;
+									}
+									if (checker) {
+										square.classList.add('checker-dark');
+									} else {
+										square.classList.add('checker-light');
+									}
+									square.classList.add('piece');
+									square.innerHTML = pieces[row * 8 + col];
+									chessboard.appendChild(square);   
+									square.addEventListener('click', handlePieceClick);
+									checker = !checker;
+								}
+							}
+							completeMove = [];
+						} else {
+							console.log(`No complete move registered yet, existing selection: ${completeMove[0]}, ${completeMove[1]}`)
+						}
+					}
+				})
+				.catch(error => {
+					console.error('Error:', error);
+				});
+			});
+
+		
+    </script>
 </body>
 </html>
