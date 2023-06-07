@@ -2,18 +2,12 @@
 #include <boost/algorithm/string/replace.hpp>
 #include "chess/board.h"
 #include "chess/movegen.h"
+#include "chess/searcher.h"
 #include "chess/defs.h"
 
 #include <fstream>  // for reading the HTML file
 #include <iterator>
 #include <sstream> 
-
-std::string get_fen(std::string location, std::string request_url){
-    if (request_url.size() < location.size()) {
-        return "";
-    }
-    return request_url.substr(location.size());
-}
 
 chess_handler::chess_handler(string location, string request_url, NginxConfig& config){
     location_ = location;
@@ -87,6 +81,9 @@ beast::http::status chess_handler::serve(const beast::http::request<beast::http:
         generate_error_response(res, beast::http::status::bad_request, "Invalid fen");
         return res.result();
     }
+    else if (request_url_.find("+") != std::string::npos) {
+        return move_pieces(req, res);
+    }
 
     std::stringstream buffer;  //redirects the printBoard output from cout to our response body
     std::streambuf * old = std::cout.rdbuf(buffer.rdbuf());
@@ -104,34 +101,34 @@ beast::http::status chess_handler::serve(const beast::http::request<beast::http:
 
 beast::http::status chess_handler::move_pieces(const beast::http::request<beast::http::dynamic_body> req, beast::http::response<beast::http::dynamic_body>& res){
     std::string fen = get_fen(location_, request_url_);
-    std::string request_body = boost::beast::buffers_to_string(req.body().data());    
-    int index_of_plus_sign = request_body.find("+");
-
-    if(index_of_plus_sign+5 > request_body.length())
+    boost::replace_all(fen, "%20", " ");    //Browser uses %20 to handle spaces 
+    int index_of_plus_sign = request_url_.find("+");
+    if(index_of_plus_sign + 5 != request_url_.length())
     {
         generate_error_response(res, beast::http::status::bad_request, "Invalid move, please try again!");
         return res.result();
     }
 
-    int startRow = stoi(request_body.substr(index_of_plus_sign+1, index_of_plus_sign+2));
-    int startCol = stoi(request_body.substr(index_of_plus_sign+2, index_of_plus_sign+3));
-    int endRow = stoi(request_body.substr(index_of_plus_sign+3, index_of_plus_sign+4));
-    int endCol = stoi(request_body.substr(index_of_plus_sign+4, index_of_plus_sign+5));
-
+    int startRow = stoi(request_url_.substr(index_of_plus_sign+1, 1));
+    int startCol = stoi(request_url_.substr(index_of_plus_sign+2, 1));
+    int endRow = stoi(request_url_.substr(index_of_plus_sign+3, 1));
+    int endCol = stoi(request_url_.substr(index_of_plus_sign+4, 1));
+    
     if(startRow<0 || startRow>7 || startCol<0 || startCol>7 || endRow<0 || endRow>7 || endCol<0 || endCol>7)
     {
         generate_error_response(res, beast::http::status::bad_request, "Invalid move, please try again!");
         return res.result();
     }
-
     else
     {
         int piece = NOPIECE; //initialized to NOPIECE for testing purposes
     
-        Movegen* m;
+        Searcher* s = new Searcher();
+        Movegen* m = s->getMoveGenerator();
+        Board* b = m->getBoard();
         bool isPseudoLegal = false;
 
-        m->getBoard()->parseFen(fen);
+        b->parseFen(fen);
         std::list<int> moves = m->generateMoves();
         int userMove = m->getMove(startRow, startCol, endRow, endCol, piece);
 
@@ -144,7 +141,6 @@ beast::http::status chess_handler::move_pieces(const beast::http::request<beast:
                 break;
             }
         }
-
         bool result;
         if (!isPseudoLegal)
         {
@@ -158,18 +154,26 @@ beast::http::status chess_handler::move_pieces(const beast::http::request<beast:
 
         if(!result){
             generate_error_response(res, beast::http::status::bad_request, "Invalid move, please try again!");
+            delete s;
             return res.result();
         }
 
+        //TODO: Check if the game has ended
+        
+        //Now the AI will generate a move
+        int computerMove = s->reccomendMove();
+        m->makeMove(computerMove);
+
+        //TODO: Check if the game has ended
+
         // returning status ok in case that it was a legal move
-        Board b;
         std::stringstream buffer;  //redirects the printBoard output from cout to our response body
         std::streambuf * old = std::cout.rdbuf(buffer.rdbuf());
-        b.printBoard(b.getSide());
+        b->printBoard(b->getSide());
         std::string res_body = buffer.str();
         std::cout.rdbuf(old);      //restores cout to its original stream
 
-        std::string new_fen = b.getFen();
+        std::string new_fen = b->getFen();
         //concatenating updated fen to the back end of the response body
         //part after + sign will be the updated fen
         res_body = res_body + "+" + new_fen;
@@ -179,6 +183,7 @@ beast::http::status chess_handler::move_pieces(const beast::http::request<beast:
     
         res.content_length((res.body().size()));
         res.set(boost::beast::http::field::content_type, "text/plain");
+        delete s;
         return res.result();
     }
 }
@@ -188,17 +193,13 @@ std::string chess_handler::get_fen(std::string location, std::string request_url
         return "";
     }
     std::string temp = request_url.substr(location.size());
-    //this logic will get just the fen and remove everything that comes after + sign which denotes the move
-    int index = temp.find("+");
-    //checks for the case the only /chess/FEN is passed
-    //because we don't want to incorrectly throw an error if the +move part isn't present in the string
-    if (index == -1)
+    if (temp.find("+") == std::string::npos)
     {
         return temp;
     }
     else
     {
-        return temp.substr(0,index);
+        return temp.substr(0,temp.find("+"));
     }
 }
 
