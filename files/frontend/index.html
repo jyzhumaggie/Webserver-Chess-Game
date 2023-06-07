@@ -31,7 +31,7 @@
         }
 
         .highlight {
-            background-color: rgba(0, 0, 0, 0.5) !important;
+            background-color: rgba(155, 179, 109, 0.816) ! !important;
         }
     </style>
 </head>
@@ -51,21 +51,16 @@
 				.then(response => response.text())
 				.then(data => {
 					console.log(data);
-					// TODO: Initialize board using response data (FEN)
+					// TODO: Initialize board using response data (board)
+					var pieces = getUnicodeFromBoard(data);
+					
 					const chessboard = document.querySelector('.chessboard');
-					var pieces = ['♜', '♞', '♝', '♛', '♚', '♝', '♞', '♜',
-									'♟', '♟', '♟', '♟', '♟', '♟', '♟', '♟',
-									'', '', '', '', '', '', '', '',
-									'', '', '', '', '', '', '', '',
-									'', '', '', '', '', '', '', '',
-									'', '', '', '', '', '', '', '',
-									'♙', '♙', '♙', '♙', '♙', '♙', '♙', '♙',
-									'♖', '♘', '♗', '♕', '♔', '♗', '♘', '♖'];
-					var checker = true;
 					while (chessboard.firstChild) {
 						chessboard.firstChild.remove();
 						console.log(`Starting new game, cleared Chessboard`);
 					}
+
+					var checker = true;
 					for (let row = 0; row < 8; row++) {
 						for (let col = 0; col < 8; col++) {
 							const square = document.createElement('div');
@@ -106,43 +101,53 @@
 						if (completeMove.length == 4) {
 							console.log("Complete move registered!");
 
-							// TODO: call API to vetMove (check if legal, then make move/report bad move), return new FEN
+							// Handling selection of the same piece, indicating that the user is intending to reselect
+							if (completeMove[0] == completeMove[2] && completeMove[1] == completeMove[3]) {
+								completeMove = [];
+								this.classList.remove('highlight');
+								console.log("Same piece selected, clear piece choice.")
+							} else {
+								// TODO: send request for FEN+move to get FEN+board in response, update display
 
-							// Placeholder before getting new FEN to signal chessboard change on completed move selection:
-							pieces = ['', '♞', '♝', '♛', '♚', '♝', '♞', '♜',
-									'♟', '♟', '♟', '♟', '♟', '♟', '♟', '♟',
-									'', '', '', '', '', '', '', '',
-									'♜', '', '', '', '', '', '', '',
-									'', '', '', '', '', '', '', '',
-									'', '', '', '', '', '', '', '',
-									'♙', '♙', '♙', '♙', '♙', '♙', '♙', '♙',
-									'♖', '♘', '♗', '♕', '♔', '♗', '♘', '♖'];
+								// Placeholder before getting new FEN to signal chessboard change on completed move selection:
+								pieces = ['', '♞', '♝', '♛', '♚', '♝', '♞', '♜',
+										'♟', '♟', '♟', '♟', '♟', '♟', '♟', '♟',
+										'', '', '', '', '', '', '', '',
+										'♜', '', '', '', '', '', '', '',
+										'', '', '', '', '', '', '', '',
+										'', '', '', '', '', '', '', '',
+										'♙', '♙', '♙', '♙', '♙', '♙', '♙', '♙',
+										'♖', '♘', '♗', '♕', '♔', '♗', '♘', '♖'];
 
-							while (chessboard.firstChild) {
-								chessboard.firstChild.remove();
-								console.log(`Cleared Chessboard`);
-							}
+								while (chessboard.firstChild) {
+									chessboard.firstChild.remove();
+									console.log(`Cleared Chessboard`);
+								}
 
-							for (let row = 0; row < 8; row++) {
-								for (let col = 0; col < 8; col++) {
-									const square = document.createElement('div');
-									if (col == 0) {
+								for (let row = 0; row < 8; row++) {
+									for (let col = 0; col < 8; col++) {
+										const square = document.createElement('div');
+										if (col == 0) {
+											checker = !checker;
+										}
+										if (checker) {
+											square.classList.add('checker-dark');
+										} else {
+											square.classList.add('checker-light');
+										}
+										square.classList.add('piece');
+										square.innerHTML = pieces[row * 8 + col];
+										chessboard.appendChild(square);   
+										square.addEventListener('click', handlePieceClick);
 										checker = !checker;
 									}
-									if (checker) {
-										square.classList.add('checker-dark');
-									} else {
-										square.classList.add('checker-light');
-									}
-									square.classList.add('piece');
-									square.innerHTML = pieces[row * 8 + col];
-									chessboard.appendChild(square);   
-									square.addEventListener('click', handlePieceClick);
-									checker = !checker;
 								}
-							}
-							completeMove = [];
+								completeMove = [];
+							} 
 						} else {
+							// When completeMove.length == 2
+							// TODO: Check to see if a valid piece is chosen:
+							// that is, the rowPos and colPos matches a piece that belongs to the user side
 							console.log(`No complete move registered yet, existing selection: ${completeMove[0]}, ${completeMove[1]}`)
 						}
 					}
@@ -152,7 +157,74 @@
 				});
 			});
 
-		
+		function getUnicodeFromBoard(board) {
+			var pieces = [];
+			for (var i = 0; i < board.length; i++) {
+				var character = board.charAt(i);
+				switch (character) {
+					case 'P':
+						console.log("Found 'P'");
+						pieces.push('♙');
+						break;
+					case 'R':
+						console.log("Found 'R'");
+						pieces.push('♖');
+						break;
+					case 'N':
+						console.log("Found 'N'");
+						pieces.push('♘');
+						break;
+					case 'B':
+						console.log("Found 'B'");
+						pieces.push('♗');
+						break;
+					case 'Q':
+						console.log("Found 'Q'");
+						pieces.push('♕');
+						break;
+					case 'K':
+						console.log("Found 'K'");
+						pieces.push('♔');
+						break;
+
+					case 'p':
+						console.log("Found 'p'");
+						pieces.push('♟');
+						break;
+					case 'r':
+						console.log("Found 'r'");
+						pieces.push('♜');
+						break;	
+					case 'n':
+						console.log("Found 'n'");
+						pieces.push('♞');
+						break;
+					case 'b':
+						console.log("Found 'b'");
+						pieces.push('♝');
+						break;
+					case 'q':
+						console.log("Found 'q'");
+						pieces.push('♛');
+						break;
+					case 'k':
+						console.log("Found 'k'");
+						pieces.push('♚');
+						break;
+					case '.':
+						console.log("Found '.'");
+						pieces.push('');
+						break;	
+					case '-':
+						i = board.length;
+						break;
+					default:
+						console.log("Found other character");
+						break;
+				}
+			}
+			return pieces;
+		}
     </script>
 </body>
 </html>
