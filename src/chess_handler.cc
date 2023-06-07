@@ -103,69 +103,103 @@ beast::http::status chess_handler::serve(const beast::http::request<beast::http:
 }
 
 beast::http::status chess_handler::move_pieces(const beast::http::request<beast::http::dynamic_body> req, beast::http::response<beast::http::dynamic_body>& res){
-    //have not decided yet how we're going to get user input for startPos and endPos for each move
-    //so these variables are initialized to temp values, will be updated later
-    //as an example this is modelling a knight moving from g1 to f3
-    int startRow = 7;
-    int startCol = 6;
-    int endRow = 5;
-    int endCol = 5;
-    int piece = NOPIECE; //initialized to NOPIECE for testing purposes
-    
-    Movegen* m;
-    bool isPseudoLegal = false;
-    std::string fen = "temp fen for testing"; //will be updated in next commit when I handle GET request
+    std::string fen = get_fen(location_, request_url_);
+    std::string request_body = boost::beast::buffers_to_string(req.body().data());    
+    int index_of_plus_sign = request_body.find("+");
 
-    m->getBoard()->parseFen(fen);
-    std::list<int> moves = m->generateMoves();
-    int userMove = m->getMove(startRow, startCol, endRow, endCol, piece);
-
-    //Ensure the inputted move is at least a pseudolegal move
-    for (std::list<int>::iterator itr = moves.begin(); itr != moves.end(); itr++)
+    if(index_of_plus_sign+5 > request_body.length())
     {
-        if (*itr == userMove)
-        {
-            isPseudoLegal = true;
-            break;
-        }
-    }
-
-    bool result;
-    if (!isPseudoLegal)
-    {
-        result = false;
-    }
-    else
-    {
-        result = m->makeMove(userMove);
-    }
-
-    if(!result){
         generate_error_response(res, beast::http::status::bad_request, "Invalid move, please try again!");
         return res.result();
     }
 
-    // returning status ok in case that it was a legal move
-    Board b;
-    std::stringstream buffer;  //redirects the printBoard output from cout to our response body
-    std::streambuf * old = std::cout.rdbuf(buffer.rdbuf());
-    b.printBoard(b.getSide());
-    std::string res_body = buffer.str();
-    std::cout.rdbuf(old);      //restores cout to its original stream
+    int startRow = stoi(request_body.substr(index_of_plus_sign+1, index_of_plus_sign+2));
+    int startCol = stoi(request_body.substr(index_of_plus_sign+2, index_of_plus_sign+3));
+    int endRow = stoi(request_body.substr(index_of_plus_sign+3, index_of_plus_sign+4));
+    int endCol = stoi(request_body.substr(index_of_plus_sign+4, index_of_plus_sign+5));
 
-    res.result(boost::beast::http::status::ok);
-    boost::beast::ostream(res.body()) << res_body;
+    if(startRow<0 || startRow>7 || startCol<0 || startCol>7 || endRow<0 || endRow>7 || endCol<0 || endCol>7)
+    {
+        generate_error_response(res, beast::http::status::bad_request, "Invalid move, please try again!");
+        return res.result();
+    }
+
+    else
+    {
+        int piece = NOPIECE; //initialized to NOPIECE for testing purposes
     
-    res.content_length((res.body().size()));
-    res.set(boost::beast::http::field::content_type, "text/plain");
-    return res.result();
+        Movegen* m;
+        bool isPseudoLegal = false;
+
+        m->getBoard()->parseFen(fen);
+        std::list<int> moves = m->generateMoves();
+        int userMove = m->getMove(startRow, startCol, endRow, endCol, piece);
+
+        //Ensure the inputted move is at least a pseudolegal move
+        for (std::list<int>::iterator itr = moves.begin(); itr != moves.end(); itr++)
+        {
+            if (*itr == userMove)
+            {
+                isPseudoLegal = true;
+                break;
+            }
+        }
+
+        bool result;
+        if (!isPseudoLegal)
+        {
+            result = false;
+        }
+        else
+        {
+            //given that move is pseudolegal, testing if it is legal using makeMove function
+            result = m->makeMove(userMove);
+        }
+
+        if(!result){
+            generate_error_response(res, beast::http::status::bad_request, "Invalid move, please try again!");
+            return res.result();
+        }
+
+        // returning status ok in case that it was a legal move
+        Board b;
+        std::stringstream buffer;  //redirects the printBoard output from cout to our response body
+        std::streambuf * old = std::cout.rdbuf(buffer.rdbuf());
+        b.printBoard(b.getSide());
+        std::string res_body = buffer.str();
+        std::cout.rdbuf(old);      //restores cout to its original stream
+
+        std::string new_fen = b.getFen();
+        //concatenating updated fen to the back end of the response body
+        //part after + sign will be the updated fen
+        res_body = res_body + "+" + new_fen;
+
+        res.result(boost::beast::http::status::ok);
+        boost::beast::ostream(res.body()) << res_body;
+    
+        res.content_length((res.body().size()));
+        res.set(boost::beast::http::field::content_type, "text/plain");
+        return res.result();
+    }
 }
 
 std::string chess_handler::get_fen(std::string location, std::string request_url){
     if (request_url.size() < location.size()) {
         return "";
     }
-    return request_url.substr(location.size());
+    std::string temp = request_url.substr(location.size());
+    //this logic will get just the fen and remove everything that comes after + sign which denotes the move
+    int index = temp.find("+");
+    //checks for the case the only /chess/FEN is passed
+    //because we don't want to incorrectly throw an error if the +move part isn't present in the string
+    if (index == -1)
+    {
+        return temp;
+    }
+    else
+    {
+        return temp.substr(0,index);
+    }
 }
 
 beast::http::status chess_handler::generate_error_response(beast::http::response<beast::http::dynamic_body>& res, beast::http::status s, std::string msg){
