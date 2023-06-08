@@ -31,7 +31,7 @@
         }
 
         .highlight {
-            background-color: rgba(155, 179, 109, 0.816) ! !important;
+            background-color: rgba(155, 179, 109, 0.816) !important;
         }
     </style>
 </head>
@@ -51,15 +51,15 @@
 				.then(response => response.text())
 				.then(data => {
 					console.log(data);
-					// TODO: Initialize board using response data (board)
+					// Initialize board using response data (board)
 					var pieces = getUnicodeFromBoard(data);
 					
+					// Creating checkered board
 					const chessboard = document.querySelector('.chessboard');
 					while (chessboard.firstChild) {
 						chessboard.firstChild.remove();
 						console.log(`Starting new game, cleared Chessboard`);
 					}
-
 					var checker = true;
 					for (let row = 0; row < 8; row++) {
 						for (let col = 0; col < 8; col++) {
@@ -80,27 +80,37 @@
 						}
 					}
 
+					// Placeholder until FEN is passed in as part of data (data = board+FEN)
+					var placeholderFEN = data;
 					var completeMove = [];
 					function handlePieceClick() {
 						// Clear previous highlights
 						const squares = document.querySelectorAll('.chessboard div');
 						squares.forEach(square => square.classList.remove('highlight'));
 
-						// Highlight clicked piece's square
-						this.classList.add('highlight');
-
 						// Get the position of the clicked piece
 						const rowIndex = Math.floor(Array.from(chessboard.children).indexOf(this) / 8);
 						const colIndex = Array.from(chessboard.children).indexOf(this) % 8;
 
 						// Display the position in the console
-						console.log(`Clicked piece: row ${rowIndex}, column ${colIndex}`);
-						
+						console.log(`Clicked grid: row ${rowIndex}, column ${colIndex}`);
 						// Composing a move
 						completeMove.push(rowIndex, colIndex);
-						if (completeMove.length == 4) {
-							console.log("Complete move registered!");
 
+						// After selecting one grid
+						if (completeMove.length == 2) {
+							if (this.innerHTML == "") {
+								alert("Please select a piece!");
+								completeMove = [];
+								return;
+							} else {
+								// Highlight clicked piece's square
+								this.classList.add('highlight');
+								console.log(`No complete move registered yet, existing selection: ${completeMove[0]}, ${completeMove[1]}`);
+							}
+						// When completeMove.length == 4
+						} else {
+							console.log("Complete move registered!");
 							// Handling selection of the same piece, indicating that the user is intending to reselect
 							if (completeMove[0] == completeMove[2] && completeMove[1] == completeMove[3]) {
 								completeMove = [];
@@ -108,47 +118,45 @@
 								console.log("Same piece selected, clear piece choice.")
 							} else {
 								// TODO: send request for FEN+move to get FEN+board in response, update display
-
-								// Placeholder before getting new FEN to signal chessboard change on completed move selection:
-								pieces = ['', '♞', '♝', '♛', '♚', '♝', '♞', '♜',
-										'♟', '♟', '♟', '♟', '♟', '♟', '♟', '♟',
-										'', '', '', '', '', '', '', '',
-										'♜', '', '', '', '', '', '', '',
-										'', '', '', '', '', '', '', '',
-										'', '', '', '', '', '', '', '',
-										'♙', '♙', '♙', '♙', '♙', '♙', '♙', '♙',
-										'♖', '♘', '♗', '♕', '♔', '♗', '♘', '♖'];
-
-								while (chessboard.firstChild) {
-									chessboard.firstChild.remove();
-									console.log(`Cleared Chessboard`);
-								}
-
-								for (let row = 0; row < 8; row++) {
-									for (let col = 0; col < 8; col++) {
-										const square = document.createElement('div');
-										if (col == 0) {
+								var requestString = placeholderFEN + completeMove[0] + completeMove[1] + completeMove[2] + completeMove[3];
+								console.log(requestString);
+								// fetch string will be replace by requestString
+								fetch("rnbqkbnr/ppppp1pp/5p2/3P4/5P2/4P1P1/PPP4P/RNBQKBNR")
+								.then(response => response.text())
+								.then(data => {
+									console.log(data);
+									// Placeholder before getting new FEN to signal chessboard change on completed move selection:
+									// TODO: parse the response data, data -> board+FEN
+									pieces = getUnicodeFromBoard(data);
+									while (chessboard.firstChild) {
+										chessboard.firstChild.remove();
+										console.log(`Cleared Chessboard`);
+									}
+									for (let row = 0; row < 8; row++) {
+										for (let col = 0; col < 8; col++) {
+											const square = document.createElement('div');
+											if (col == 0) {
+												checker = !checker;
+											}
+											if (checker) {
+												square.classList.add('checker-dark');
+											} else {
+												square.classList.add('checker-light');
+											}
+											square.classList.add('piece');
+											square.innerHTML = pieces[row * 8 + col];
+											chessboard.appendChild(square);   
+											square.addEventListener('click', handlePieceClick);
 											checker = !checker;
 										}
-										if (checker) {
-											square.classList.add('checker-dark');
-										} else {
-											square.classList.add('checker-light');
-										}
-										square.classList.add('piece');
-										square.innerHTML = pieces[row * 8 + col];
-										chessboard.appendChild(square);   
-										square.addEventListener('click', handlePieceClick);
-										checker = !checker;
 									}
-								}
+								})
+								.catch(error => {
+									console.error('Error:', error);
+								});
+
 								completeMove = [];
 							} 
-						} else {
-							// When completeMove.length == 2
-							// TODO: Check to see if a valid piece is chosen:
-							// that is, the rowPos and colPos matches a piece that belongs to the user side
-							console.log(`No complete move registered yet, existing selection: ${completeMove[0]}, ${completeMove[1]}`)
 						}
 					}
 				})
