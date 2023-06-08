@@ -47,7 +47,7 @@
 		var btn = document.getElementById('myButton');
 
 		btn.addEventListener('click', function() {
-			fetch('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR')
+			fetch('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -')
 				.then(response => response.text())
 				.then(data => {
 					console.log(data);
@@ -80,8 +80,8 @@
 						}
 					}
 
-					// Placeholder until FEN is passed in as part of data (data = board+FEN)
-					var placeholderFEN = data;
+					// Initial FEN
+					var FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -";
 					var completeMove = [];
 					function handlePieceClick() {
 						// Clear previous highlights
@@ -117,16 +117,22 @@
 								this.classList.remove('highlight');
 								console.log("Same piece selected, clear piece choice.")
 							} else {
-								// TODO: send request for FEN+move to get FEN+board in response, update display
-								var requestString = placeholderFEN + completeMove[0] + completeMove[1] + completeMove[2] + completeMove[3];
+								// send request for FEN+move to get FEN+board in response, update display
+								var requestString = FEN + "+" + completeMove[0] + completeMove[1] + completeMove[2] + completeMove[3];
 								console.log(requestString);
 								// fetch string will be replace by requestString
-								fetch("rnbqkbnr/ppppp1pp/5p2/3P4/5P2/4P1P1/PPP4P/RNBQKBNR")
-								.then(response => response.text())
+								fetch(requestString)
+								.then(response => { 
+									if (response.ok) {
+										return response.text(); 
+									} else {
+										throw new Error('Response status was not OK');
+									}
+								})
 								.then(data => {
 									console.log(data);
-									// Placeholder before getting new FEN to signal chessboard change on completed move selection:
-									// TODO: parse the response data, data -> board+FEN
+									var [board, newFEN] = parseResponseBody(data);
+									FEN = newFEN;
 									pieces = getUnicodeFromBoard(data);
 									while (chessboard.firstChild) {
 										chessboard.firstChild.remove();
@@ -153,6 +159,7 @@
 								})
 								.catch(error => {
 									console.error('Error:', error);
+									alert("Illegal Move");
 								});
 
 								completeMove = [];
@@ -164,7 +171,7 @@
 					console.error('Error:', error);
 				});
 			});
-
+		
 		function getUnicodeFromBoard(board) {
 			var pieces = [];
 			for (var i = 0; i < board.length; i++) {
@@ -232,6 +239,15 @@
 				}
 			}
 			return pieces;
+		}
+		function parseResponseBody(data) {
+			var board = [];
+			var i = data.indexOf('+');
+			if (i == 0) {
+				console.log("Return body does not contain a '+' character");
+				return false;
+			}
+			return [data.substring(0, i), data.substring(i+1, data.length)];
 		}
     </script>
 </body>
