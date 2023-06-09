@@ -81,6 +81,9 @@ beast::http::status chess_handler::serve(const beast::http::request<beast::http:
         generate_error_response(res, beast::http::status::bad_request, "Invalid fen");
         return res.result();
     }
+    else if (request_url_.find("+ai") != std::string::npos) {
+        return handle_ai(req, res);
+    }
     else if (request_url_.find("+") != std::string::npos) {
         return move_pieces(req, res);
     }
@@ -103,18 +106,9 @@ beast::http::status chess_handler::move_pieces(const beast::http::request<beast:
     std::string fen = get_fen(location_, request_url_);
     boost::replace_all(fen, "%20", " ");    //Browser uses %20 to handle spaces 
     int index_of_plus_sign = request_url_.find("+");
-    if(index_of_plus_sign + 5 != request_url_.length())
-    {
-        generate_error_response(res, beast::http::status::bad_request, "Invalid move, please try again!");
-        return res.result();
-    }
 
-    int startRow = stoi(request_url_.substr(index_of_plus_sign+1, 1));
-    int startCol = stoi(request_url_.substr(index_of_plus_sign+2, 1));
-    int endRow = stoi(request_url_.substr(index_of_plus_sign+3, 1));
-    int endCol = stoi(request_url_.substr(index_of_plus_sign+4, 1));
-    
-    if(startRow<0 || startRow>7 || startCol<0 || startCol>7 || endRow<0 || endRow>7 || endCol<0 || endCol>7)
+    //case that it is /fen+move request and move string is something other than 4 digits
+    if(index_of_plus_sign + 5 != request_url_.length())
     {
         generate_error_response(res, beast::http::status::bad_request, "Invalid move, please try again!");
         return res.result();
@@ -122,6 +116,15 @@ beast::http::status chess_handler::move_pieces(const beast::http::request<beast:
     else
     {
         int piece = NOPIECE; //initialized to NOPIECE for testing purposes
+        int startRow = request_url_[index_of_plus_sign + 1] - '0';
+        int startCol = request_url_[index_of_plus_sign + 2] - '0';
+        int endRow = request_url_[index_of_plus_sign + 3] - '0';
+        int endCol = request_url_[index_of_plus_sign + 4] - '0';
+
+        if (startRow < 0 || startRow > 7 || endRow < 0 || endRow > 7 || startCol < 0 || startCol > 7 || endCol < 0 || endCol > 7) {
+            generate_error_response(res, beast::http::status::bad_request, "Invalid move, please try again!");
+            return res.result();
+        }
     
         Searcher* s = new Searcher();
         Movegen* m = s->getMoveGenerator();
@@ -159,12 +162,6 @@ beast::http::status chess_handler::move_pieces(const beast::http::request<beast:
         }
 
         //TODO: Check if the game has ended
-        
-        //Now the AI will generate a move
-        int computerMove = s->reccomendMove();
-        m->makeMove(computerMove);
-
-        //TODO: Check if the game has ended
 
         // returning status ok in case that it was a legal move
         std::stringstream buffer;  //redirects the printBoard output from cout to our response body
@@ -186,6 +183,42 @@ beast::http::status chess_handler::move_pieces(const beast::http::request<beast:
         delete s;
         return res.result();
     }
+}
+
+beast::http::status chess_handler::handle_ai(const beast::http::request<beast::http::dynamic_body> req, beast::http::response<beast::http::dynamic_body>& res) {
+    std::string fen = get_fen(location_, request_url_);
+    boost::replace_all(fen, "%20", " ");    //Browser uses %20 to handle spaces 
+    
+    //Now the AI will generate a move
+    Searcher* s = new Searcher();
+    Movegen* m = s->getMoveGenerator();
+    Board* b = m->getBoard();
+    b->parseFen(fen);
+
+    int computerMove = s->reccomendMove();
+    m->makeMove(computerMove);
+
+    //TODO: Check if the game has ended
+    
+    // returning status ok in case that it was a legal move
+    std::stringstream buffer;  //redirects the printBoard output from cout to our response body
+    std::streambuf * old = std::cout.rdbuf(buffer.rdbuf());
+    b->printBoard(b->getSide());
+    std::string res_body = buffer.str();
+    std::cout.rdbuf(old);      //restores cout to its original stream
+
+    std::string new_fen = b->getFen();
+    //concatenating updated fen to the back end of the response body
+    //part after + sign will be the updated fen
+    res_body = res_body + "+" + new_fen;
+
+    res.result(boost::beast::http::status::ok);
+    boost::beast::ostream(res.body()) << res_body;
+
+    res.content_length((res.body().size()));
+    res.set(boost::beast::http::field::content_type, "text/plain");
+    delete s;
+    return res.result();
 }
 
 std::string chess_handler::get_fen(std::string location, std::string request_url){
