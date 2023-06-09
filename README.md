@@ -193,3 +193,60 @@ The create function is inherited from the request_handler_factory interface and 
 
 ## Adding Another Request_handler_factory
 To create a new derived class from request_handler_factory, create a corresponding header and source file in the include folder. In the header file, include the parant class `request_handler_factory.h`. Note that request_handler_factory should declare the constructors and inherited functions public, and it should make other variables private. In the source file, include the header file of the new request handler factory, other needed header files, and useful libraries. Afterwards, proceed to implement the constructor and create function.
+
+
+# ChessHandler Interface
+The chess_handler.cc and chess_handler.h files handle all the processing that needs to be done to connect the chess API in the `/chess` folder to our existing webserver interface. The structure of these files and the overarching functionality of the member functions is explained below:
+
+**chess_handler.h**
+```
+#ifndef CHESS_HANDLER_H
+#define CHESS_HANDLER_H
+
+#include <string>
+#include <vector>
+#include "request_handler.h"
+#include "header.h"
+#include "reply.h"
+
+#include <boost/asio.hpp>
+#include <iostream>
+
+
+
+using namespace http::server;
+using boost::asio::ip::tcp;
+using namespace std;
+
+/**
+ * chess_handler class
+ *
+ * Inherits from chess_handler class
+ *
+ * The chess handler listens on the "/chess/" datapath, and takes in a FEN string afterwards
+ *
+ * The function handle_request constructs the response 
+ * with the proper status codes, content, and headers.
+ */
+
+class chess_handler : public request_handler {
+    public:
+        chess_handler(string location, string request_url, NginxConfig& config_);
+        beast::http::status serve(const beast::http::request<beast::http::dynamic_body> req, beast::http::response<beast::http::dynamic_body>& res);
+        beast::http::status move_pieces(const beast::http::request<beast::http::dynamic_body> req, beast::http::response<beast::http::dynamic_body>& res);
+    private:
+        std::string get_fen(std::string location, std::string request_url);
+        beast::http::status generate_error_response(beast::http::response<beast::http::dynamic_body>& res, beast::http::status s, std::string msg);
+        std::string location_;
+        std::string request_url_;
+        NginxConfig config_;
+};
+
+#endif
+```
+
+The functionality and usage of some of the key functions of this interface is explained below:
+- `serve`: serves as the main routine for our chess class. Anything with a /chess/ endpoint is detected by this function. It calls a function to parse through the html request and extract the FEN string (which is a unique representation of the state of the chess board at any given time). It also calls the move_pieces function to make either the user or computer AI-generated moves.  
+- `move_pieces`: handles http requests in the form of /fen, /fen+move, /fen+ai. This function also parses through the given string to ensure malicious user requests return an error response and do not crash the server. Based on whether the user of the computer is supposed to make the next move, this function will call the appropriate functions from the chess API and return the result in the body of an http response.
+- `get_fen`: this function extracts specifically the FEN string from the given http request, which may be in the form of /fen, /fen+move, or /fen+ai. Here the "+move" string represents the user's desired move and the "+ai" string represents the AI-generated move.
+- `generate_error_response`: populates the http response with proper error message and error codes which will be returned in the case there was a bad request to our server.
