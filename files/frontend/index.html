@@ -86,15 +86,15 @@
 			flex-direction: column;
 			justify-content: center;
 			align-items: center;
-			height: 85vh;
+			height: 100vh;
 		}
 
         .chessboard {
             display: grid;
             grid-template-columns: repeat(8, 1fr);
             grid-template-rows: repeat(8, 1fr);
-            width: 400px;
-            height: 400px;
+            width: 500px;
+            height: 500px;
         }
 
         .chessboard div {
@@ -109,7 +109,7 @@
 		}
 
         .piece {
-            font-size: 40px;
+            font-size: 50px;
             text-align: center;
             line-height: 1;
         }
@@ -120,12 +120,22 @@
 			transition: box-shadow .15s ease;
 		}
 
+		.knight{
+			height:25%;
+			padding:20px;
+			padding-top: 20%;
+			mix-blend-mode: multiply;
+			filter: invert(15%) saturate(2000%) hue-rotate(-10deg);
+		}
+
     </style>
 </head>
 
 
 <body>
-	<div class ="container">
+	<div class ="container" id="container">
+		<!-- Menu Image -->
+		<img id="knight" src="https://freesvg.org/img/Chess-Knight.png" class="knight">
 		<!-- Start New Game button -->
 		<button type="button" id="myButton" class ="button-19">Start New Game</button>
 		<!-- Chessboard Display -->
@@ -141,6 +151,16 @@
 			
 			var x = document.getElementById("chessboard");
 			x.style.border= "2px solid white";
+			x.style.display = "grid";
+			x.style.gridTemplateColumns = "repeat(8, 1fr)";
+			x.style.gridTemplateRows = "repeat(8, 1fr)";
+
+			var knight_image = document.getElementById("knight");
+			knight_image.style.display = "none";
+
+			var container = document.getElementById("container");
+			container.style.height="85vh";
+
 			fetch('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -')
 				.then(response => response.text())
 				.then(data => {
@@ -228,6 +248,7 @@
 									var [board, newFEN] = parseResponseBody(data);
 									FEN = newFEN;
 									pieces = getUnicodeFromBoard(data);
+									pieces.reverse();
 									while (chessboard.firstChild) {
 										chessboard.firstChild.remove();
 										console.log(`Cleared Chessboard`);
@@ -250,10 +271,49 @@
 											checker = !checker;
 										}
 									}
+									requestString = FEN + "+ai";
+									fetch(requestString)
+									.then(response => { 
+										if (response.ok) {
+											return response.text(); 
+										} else {
+											throw new Error('Response status was not OK');
+										}
+									})
+									.then(data => {
+										console.log(data);
+										var [board, newFEN] = parseResponseBody(data);
+										FEN = newFEN;
+										pieces = getUnicodeFromBoard(data);
+										while (chessboard.firstChild) {
+											chessboard.firstChild.remove();
+											console.log(`Cleared Chessboard`);
+										}
+										for (let row = 0; row < 8; row++) {
+											for (let col = 0; col < 8; col++) {
+												const square = document.createElement('div');
+												if (col == 0) {
+													checker = !checker;
+												}
+												if (checker) {
+													square.classList.add('checker-dark');
+												} else {
+													square.classList.add('checker-light');
+												}
+												square.classList.add('piece');
+												square.innerHTML = pieces[row * 8 + col];
+												chessboard.appendChild(square);   
+												square.addEventListener('click', handlePieceClick);
+												checker = !checker;
+											}
+										}
+									})
+									.catch(error => {
+										console.error('Error:', error);
+									});
 								})
 								.catch(error => {
 									console.error('Error:', error);
-									alert("Illegal Move");
 								});
 
 								completeMove = [];
@@ -335,7 +395,6 @@
 			return pieces;
 		}
 		function parseResponseBody(data) {
-			var board = [];
 			var i = data.indexOf('+');
 			if (i == 0) {
 				console.log("Return body does not contain a '+' character");
