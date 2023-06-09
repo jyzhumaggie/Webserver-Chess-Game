@@ -4,6 +4,91 @@
 	<meta charset="utf-8"> 
     <title>Chessboard</title>
     <style>
+		/* https://getcssscan.com/css-buttons-examples for button css*/
+		.button-19 {
+			appearance: button;
+			background-color: #428547;
+			border: solid transparent;
+			border-radius: 16px;
+			border-width: 0 0 4px;
+			box-sizing: border-box;
+			color: #FFFFFF;
+			cursor: pointer;
+			display: inline-block;
+			font-family: din-round,sans-serif;
+			font-size: 15px;
+			font-weight: 700;
+			letter-spacing: .8px;
+			line-height: 20px;
+			margin: 0;
+			outline: none;
+			overflow: visible;
+			padding: 13px 16px;
+			text-align: center;
+			text-transform: uppercase;
+			touch-action: manipulation;
+			transform: translateZ(0);
+			transition: filter .2s;
+			user-select: none;
+			-webkit-user-select: none;
+			vertical-align: middle;
+			white-space: nowrap;
+			width: 30%;
+			text-decoration:none;
+			margin-bottom: 20px;
+		}
+		.button-19:after {
+			background-clip: padding-box;
+			background-color: #5dbb63;
+			border: solid transparent;
+			border-radius: 16px;
+			border-width: 0 0 4px;
+			bottom: -4px;
+			content: "";
+			left: 0;
+			position: absolute;
+			right: 0;
+			top: 0;
+			z-index: -1;
+		}
+
+		.button-19:main,
+		.button-19:focus {
+			user-select: auto;
+		}
+
+		.button-19:hover:not(:disabled) {
+			filter: brightness(1.1);
+			-webkit-filter: brightness(1.1);
+		}
+
+		.button-19:disabled {
+			cursor: auto;
+		}
+
+		body {
+			padding: 0;
+			margin: 0;
+		}
+
+		#background {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100vh;
+			z-index: -1;
+			background: linear-gradient(180deg,rgba(199,207,190,1) 0%,rgb(172,199,140) 100%)
+		}
+		
+		.container{
+			display:flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
+			height: 85vh;
+		}
+
         .chessboard {
             display: grid;
             grid-template-columns: repeat(8, 1fr);
@@ -13,15 +98,14 @@
         }
 
         .chessboard div {
-            border: 1px solid black;
             cursor: pointer;
         }
 
 		.checker-dark {
-			background-color: rgba(34, 49, 4, 0.901);
+			background-color: #dee5ac;
 		}
 		.checker-light {
-			background-color: rgba(89, 99, 69, 0.861);
+			background-color: #549344;
 		}
 
         .piece {
@@ -31,22 +115,32 @@
         }
 
         .highlight {
-            background-color: rgba(155, 179, 109, 0.816) !important;
-        }
+			-webkit-box-shadow: inset 0 0 10px 5px #ffd335;
+			box-shadow: inset 0 0 10px 5px #ffd335;
+			transition: box-shadow .15s ease;
+		}
+
     </style>
 </head>
 
 
 <body>
-	<!-- Start New Game button -->
-	<button type="button" id="myButton">Start New Game</button>
-	<!-- Chessboard Display -->
-    <div class="chessboard"></div>
+	<div class ="container">
+		<!-- Start New Game button -->
+		<button type="button" id="myButton" class ="button-19">Start New Game</button>
+		<!-- Chessboard Display -->
+		<div id="chessboard" class="chessboard"></div>
+	</div>
+	<!-- Pag Background -->
+	<div id="background"></div>
 
 	<script>
 		var btn = document.getElementById('myButton');
 
 		btn.addEventListener('click', function() {
+			
+			var x = document.getElementById("chessboard");
+			x.style.border= "2px solid white";
 			fetch('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -')
 				.then(response => response.text())
 				.then(data => {
