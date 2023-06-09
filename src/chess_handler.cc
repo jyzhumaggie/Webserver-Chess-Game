@@ -115,7 +115,7 @@ beast::http::status chess_handler::move_pieces(const beast::http::request<beast:
     }
     else
     {
-        int piece = NOPIECE; //initialized to NOPIECE for testing purposes
+        int piece = NOPIECE;
         int startRow = request_url_[index_of_plus_sign + 1] - '0';
         int startCol = request_url_[index_of_plus_sign + 2] - '0';
         int endRow = request_url_[index_of_plus_sign + 3] - '0';
@@ -132,6 +132,12 @@ beast::http::status chess_handler::move_pieces(const beast::http::request<beast:
         bool isPseudoLegal = false;
 
         b->parseFen(fen);
+
+        //Promotion piece is set to auto queen
+        if (endRow == 0 && b->getPce(startRow, startCol) == WP) {
+            piece = WQ;
+        }
+
         std::list<int> moves = m->generateMoves();
         int userMove = m->getMove(startRow, startCol, endRow, endCol, piece);
 

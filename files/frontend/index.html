@@ -247,17 +247,7 @@
 									console.log(data);
 									var [board, newFEN, result] = parseResponseBody(data);
 									FEN = newFEN;
-									console.log("Pushing move's result is " + result);
-									if (result != 'x') {
-										if (result == 'w') {
-											alert("You won!");
-										} else if (result == 'b') {
-											alert("You lost! Try again buddy:)");
-										} else {
-											alert("Draw! Nice going!");
-										}
-										return;
-									}
+									
 									pieces = getUnicodeFromBoard(data);
 									pieces.reverse();
 									while (chessboard.firstChild) {
@@ -282,6 +272,20 @@
 											checker = !checker;
 										}
 									}
+
+									console.log("Pushing move's result is " + result);
+									setTimeout(function() {
+										if (result != 'x') {
+											if (result == 'w') {
+												alert("You won!");
+											} else if (result == 'b') {
+												alert("You lost! Try again buddy:)");
+											} else {
+												alert("Draw! Nice going!");
+											}
+											return;
+										}
+									},1);
 									requestString = FEN + "+ai";
 									fetch(requestString)
 									.then(response => { 
@@ -293,19 +297,7 @@
 									})
 									.then(data => {
 										console.log(data);
-										var [board, newFEN, result] = parseResponseBody(data);
-										FEN = newFEN;
-										console.log("Ai move's result is " + result);
-										if (result != 'x') {
-											if (result == 'w') {
-												alert("You won!");
-											} else if (result == 'b') {
-												alert("You lost! Try again buddy:)");
-											} else {
-												alert("Draw! Nice going!");
-											}
-											return;
-										}
+										
 										pieces = getUnicodeFromBoard(data);
 										while (chessboard.firstChild) {
 											chessboard.firstChild.remove();
@@ -329,6 +321,22 @@
 												checker = !checker;
 											}
 										}
+
+										var [board, newFEN, result] = parseResponseBody(data);
+										FEN = newFEN;
+										console.log("Ai move's result is " + result);
+										setTimeout(function() {
+											if (result != 'x') {
+												if (result == 'w') {
+													alert("You won!");
+												} else if (result == 'b') {
+													alert("You lost! Try again buddy:)");
+												} else {
+													alert("Draw! Nice going!");
+												}
+												return;
+											}
+										},1);
 									})
 									.catch(error => {
 										console.error('Error:', error);
