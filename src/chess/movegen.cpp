@@ -1404,6 +1404,30 @@ int Movegen::getMove(int sR, int sC, int eR, int eC, int promoted) const
     return moveKey;
 }
 
+int Movegen::gameWinner() {
+    int numMoves = 0;
+
+    std::list<int> moves = generateMoves(); //generate pseudolegal moves
+    for (std::list<int>::iterator itr = moves.begin(); itr != moves.end(); itr++) {
+        if (makeMove(*itr)) {               //only count the move if it is legal
+            numMoves++;
+            takeBack();
+        }
+    }
+
+    if (numMoves == 0) {        //game is over  
+        int side = mBoard->getSide();
+        int kingR = mBoard->getKingR(side);
+        int kingC = mBoard->getKingC(side);
+        bool inCheck = squareAttacked(kingR, kingC, side);
+        if (!inCheck) {
+            return NEITHER;     //if not in check then it is a draw
+        }
+        return !side;           //if the king is in check then the opposite side wins
+    }
+    return -1;                  //else return -1 = game not over
+}
+
 //Perft testing functions, used to verify the integrity of the legal move generator
 void Movegen::perft(int depth)
 {

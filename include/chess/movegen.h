@@ -28,6 +28,7 @@ public:
     bool makeMove(int move);    //Returns true if we can make such a move (and makes the move), false otherwise
     void takeBack();            //Takes back the previously made move
     int getMove(int sR, int sC, int eR, int eC, int promoted) const;   //generates a move given from, and to, assumes valid parameters
+    int gameWinner();           // -1 -> Game not over | 0 -> White has won | 1 -> Black has won | 2 -> Draw
     
     Board* getBoard() const {return mBoard; } //trivial accessor
     
