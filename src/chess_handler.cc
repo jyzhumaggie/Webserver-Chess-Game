@@ -178,19 +178,19 @@ beast::http::status chess_handler::move_pieces(const beast::http::request<beast:
         int gameResult = m->gameWinner();
         if(gameResult == 0)
         {
-            res_body = res_body + "w";
+            res_body = res_body + "+w";
         }
         else if(gameResult == 1)
         {
-            res_body = res_body + "b";
+            res_body = res_body + "+b";
         }
         else if(gameResult == 2)
         {
-            res_body = res_body + "d";
+            res_body = res_body + "+d";
         }
         else
         {
-            res_body = res_body + "x";
+            res_body = res_body + "+x";
         }
 
         res.result(boost::beast::http::status::ok);
@@ -233,19 +233,19 @@ beast::http::status chess_handler::handle_ai(const beast::http::request<beast::h
     int gameResult = m->gameWinner();
     if(gameResult == 0)
     {
-        res_body = res_body + "w";
+        res_body = res_body + "+w";
     }
     else if(gameResult == 1)
     {
-        res_body = res_body + "b";
+        res_body = res_body + "+b";
     }
     else if(gameResult == 2)
     {
-        res_body = res_body + "d";
+        res_body = res_body + "+d";
     }
     else
     {
-        res_body = res_body + "x";
+        res_body = res_body + "+x";
     }
 
     res.result(boost::beast::http::status::ok);

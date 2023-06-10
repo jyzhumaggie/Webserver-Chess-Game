@@ -214,7 +214,7 @@
 						// After selecting one grid
 						if (completeMove.length == 2) {
 							if (this.innerHTML == "") {
-								alert("Please select a piece!");
+								console.log("No piece selected, clearing grid selection!");
 								completeMove = [];
 								return;
 							} else {
@@ -245,8 +245,19 @@
 								})
 								.then(data => {
 									console.log(data);
-									var [board, newFEN] = parseResponseBody(data);
+									var [board, newFEN, result] = parseResponseBody(data);
 									FEN = newFEN;
+									console.log("Pushing move's result is " + result);
+									if (result != 'x') {
+										if (result == 'w') {
+											alert("You won!");
+										} else if (result == 'b') {
+											alert("You lost! Try again buddy:)");
+										} else {
+											alert("Draw! Nice going!");
+										}
+										return;
+									}
 									pieces = getUnicodeFromBoard(data);
 									pieces.reverse();
 									while (chessboard.firstChild) {
@@ -282,8 +293,19 @@
 									})
 									.then(data => {
 										console.log(data);
-										var [board, newFEN] = parseResponseBody(data);
+										var [board, newFEN, result] = parseResponseBody(data);
 										FEN = newFEN;
+										console.log("Ai move's result is " + result);
+										if (result != 'x') {
+											if (result == 'w') {
+												alert("You won!");
+											} else if (result == 'b') {
+												alert("You lost! Try again buddy:)");
+											} else {
+												alert("Draw! Nice going!");
+											}
+											return;
+										}
 										pieces = getUnicodeFromBoard(data);
 										while (chessboard.firstChild) {
 											chessboard.firstChild.remove();
@@ -400,7 +422,13 @@
 				console.log("Return body does not contain a '+' character");
 				return false;
 			}
-			return [data.substring(0, i), data.substring(i+1, data.length)];
+			board = data.substring(0, i);
+
+			var rest = data.substring(i+1, data.length);
+			var second_sign = rest.indexOf('+');
+			var newFEN = rest.substring(0, second_sign);
+			var gameResult = rest.substring(second_sign + 1, rest.length);
+			return [board, newFEN, gameResult];
 		}
     </script>
 </body>
