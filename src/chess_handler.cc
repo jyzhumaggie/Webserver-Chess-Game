@@ -161,8 +161,6 @@ beast::http::status chess_handler::move_pieces(const beast::http::request<beast:
             return res.result();
         }
 
-        //TODO: Check if the game has ended
-
         // returning status ok in case that it was a legal move
         std::stringstream buffer;  //redirects the printBoard output from cout to our response body
         std::streambuf * old = std::cout.rdbuf(buffer.rdbuf());
@@ -174,6 +172,26 @@ beast::http::status chess_handler::move_pieces(const beast::http::request<beast:
         //concatenating updated fen to the back end of the response body
         //part after + sign will be the updated fen
         res_body = res_body + "+" + new_fen;
+
+        //Check if the game has ended
+        //appending w(white wins), b(black wins), d(draw), x(game not yet over) to response body
+        int gameResult = m->gameWinner();
+        if(gameResult == 0)
+        {
+            res_body = res_body + "w";
+        }
+        else if(gameResult == 1)
+        {
+            res_body = res_body + "b";
+        }
+        else if(gameResult == 2)
+        {
+            res_body = res_body + "d";
+        }
+        else
+        {
+            res_body = res_body + "x";
+        }
 
         res.result(boost::beast::http::status::ok);
         boost::beast::ostream(res.body()) << res_body;
@@ -197,8 +215,6 @@ beast::http::status chess_handler::handle_ai(const beast::http::request<beast::h
 
     int computerMove = s->reccomendMove();
     m->makeMove(computerMove);
-
-    //TODO: Check if the game has ended
     
     // returning status ok in case that it was a legal move
     std::stringstream buffer;  //redirects the printBoard output from cout to our response body
@@ -211,6 +227,26 @@ beast::http::status chess_handler::handle_ai(const beast::http::request<beast::h
     //concatenating updated fen to the back end of the response body
     //part after + sign will be the updated fen
     res_body = res_body + "+" + new_fen;
+
+    //Check if the game has ended
+    //appending w(white wins), b(black wins), d(draw), x(game not yet over) to response body
+    int gameResult = m->gameWinner();
+    if(gameResult == 0)
+    {
+        res_body = res_body + "w";
+    }
+    else if(gameResult == 1)
+    {
+        res_body = res_body + "b";
+    }
+    else if(gameResult == 2)
+    {
+        res_body = res_body + "d";
+    }
+    else
+    {
+        res_body = res_body + "x";
+    }
 
     res.result(boost::beast::http::status::ok);
     boost::beast::ostream(res.body()) << res_body;
